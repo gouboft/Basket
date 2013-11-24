@@ -5,20 +5,24 @@ import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
 
+import org.apache.http.util.EncodingUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 public class DomService {
     private static final boolean Debug = true;
@@ -110,7 +114,7 @@ public class DomService {
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
-    public int putUpload(OutputStream os, List<Upload> list) throws Exception {
+    public int putUpload(OutputStream fos, List<Upload> list) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.newDocument();
@@ -140,7 +144,7 @@ public class DomService {
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource domSource = new DOMSource(document);
 
-        StreamResult xmlResult = new StreamResult(os);
+        StreamResult xmlResult = new StreamResult(fos);
         transformer.transform(domSource, xmlResult);
         return 0;
     }
@@ -203,27 +207,31 @@ public class DomService {
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
-    public String putRequestData(Upload upload) throws Exception {
-        if (upload == null) {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.newDocument();
-        document.setXmlVersion("1.0");
+    public String putRequestData(FileInputStream uploadStream) throws Exception {
+        if (uploadStream == null) {
+            // Will never changed
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.newDocument();
+            document.setXmlVersion("1.0");
 
-        Element requestContext = document.createElement("DataDownloadRequest");
-        document.appendChild(requestContext);
-        //Todo: check that Wheather the TerminalNo is the same with ContainerNo
-        requestContext.setAttribute("ContainerNo", getTerminalNo());
+            Element requestContext = document.createElement("DataDownloadRequest");
+            document.appendChild(requestContext);
+            //Todo: check that Wheather the TerminalNo is the same with ContainerNo
+            requestContext.setAttribute("ContainerNo", getTerminalNo());
 
-
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        DOMSource domSource = new DOMSource(document);
-        if (Debug) Log.d(TAG, domSource.toString());
-        byte[] result = domSource.toString().getBytes("UTF-8");
-        return android.util.Base64.encodeToString(result, Base64.DEFAULT);
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource domSource = new DOMSource(document);
+            if (Debug) Log.d(TAG, domSource.toString());
+            byte[] result = domSource.toString().getBytes("UTF-8");
+            return android.util.Base64.encodeToString(result, Base64.DEFAULT);
         } else {
-            putUpload()
+            byte[] buffer = new byte[1024];
+            uploadStream.read(buffer);
+            String fileContent = EncodingUtils.getString(buffer, "UTF-8");
+            byte[] result = fileContent.toString().getBytes("UTF-8");
+            return android.util.Base64.encodeToString(result, Base64.DEFAULT);
         }
     }
 

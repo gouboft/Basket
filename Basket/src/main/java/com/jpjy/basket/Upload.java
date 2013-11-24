@@ -27,7 +27,8 @@ public class Upload {
     public String getOpenTime() {
         return OpenTime;
     }
-    public void setOpenTime (String OpenTime) {
+
+    public void setOpenTime(String OpenTime) {
         this.OpenTime = OpenTime;
     }
 
@@ -35,7 +36,8 @@ public class Upload {
     public int getOpenType() {
         return OpenType;
     }
-    public void setOpenType (int OpenType) {
+
+    public void setOpenType(int OpenType) {
         this.OpenType = OpenType;
     }
 
@@ -43,7 +45,8 @@ public class Upload {
     public String getTradeNo() {
         return TradeNo;
     }
-    public void setTradeNo (String TradeNo) {
+
+    public void setTradeNo(String TradeNo) {
         this.TradeNo = TradeNo;
     }
 
@@ -51,7 +54,8 @@ public class Upload {
     public int getBoxNo() {
         return BoxNo;
     }
-    public void setBoxNo (int BoxNo) {
+
+    public void setBoxNo(int BoxNo) {
         this.BoxNo = BoxNo;
     }
 
@@ -59,7 +63,8 @@ public class Upload {
     public int getFLAG() {
         return FLAG;
     }
-    public void setFLAG (int FLAG) {
+
+    public void setFLAG(int FLAG) {
         this.FLAG = FLAG;
     }
 

@@ -27,35 +27,44 @@ public class Data {
     public String getTradeNo() {
         return TradeNo;
     }
-    public void setTradeNo (String TradeNo) {
+
+    public void setTradeNo(String TradeNo) {
         this.TradeNo = TradeNo;
     }
+
     // CardSN
     public String getCardSN() {
         return CardSN;
     }
-    public void setCardSN (String CardSN) {
+
+    public void setCardSN(String CardSN) {
         this.CardSN = CardSN;
     }
+
     // Password
     public int getPassword() {
         return Password;
     }
-    public void setPassword (int Password) {
+
+    public void setPassword(int Password) {
         this.Password = Password;
     }
+
     // BoxNo
     public int getBoxNo() {
         return BoxNo;
     }
-    public void setBoxNo (int BoxNo) {
+
+    public void setBoxNo(int BoxNo) {
         this.BoxNo = BoxNo;
     }
+
     // FLAG
     public int getFLAG() {
         return FLAG;
     }
-    public void setFLAG (int FLAG) {
+
+    public void setFLAG(int FLAG) {
         this.FLAG = FLAG;
     }
 
