@@ -11,9 +11,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,9 +35,11 @@ public class DomService {
 
     public List<Data> getData(String responsedata) throws Exception {
         List<Data> list = null;
+
+        InputStream inputStream = new ByteArrayInputStream(responsedata.getBytes());
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(responsedata);
+        Document document = builder.parse(inputStream);
         // 得到根元素，这里是 DataDownloadResponse
         Element root = document.getDocumentElement();
         // 得到一个集合，里面存放xml文件中所有的 Data
@@ -75,12 +79,16 @@ public class DomService {
     public int getUpload(String responsedata) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(responsedata);
+        InputStream inputStream = new ByteArrayInputStream(responsedata.getBytes());
+        Document document = builder.parse(inputStream);
         // 得到根元素，这里是 DataDownloadResponse
         Element root = document.getDocumentElement();
-        // 得到一个集合，里面存放xml文件中所有的 Data
-        NodeList nodeList = root.getElementsByTagName("DataUploadResponse");
+
         String result = root.getAttribute("Result");
+
+        if(result == null)
+            return 1;
+        if (Debug) Log.d(TAG, "getUpload = " + result);
         return Integer.parseInt(result);
     }
 
@@ -111,11 +119,16 @@ public class DomService {
             }
         }
 
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
 
         DOMSource domSource = new DOMSource(document);
-
-        return domSource.toString();
-
+        StringWriter writer = new StringWriter();
+        StreamResult result = new StreamResult(writer);
+        transformer.transform(domSource, result);
+        if (Debug) Log.d(TAG, writer.toString());
+        byte[] ret = domSource.toString().getBytes("UTF-8");
+        return android.util.Base64.encodeToString(ret, Base64.DEFAULT);
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -156,23 +169,20 @@ public class DomService {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
                 element.setAttribute("name", name[k]);
+                element.setTextContent(value[k]);
             }
-        }
-        for (int m = 0; m < name.length; m++) {
-            nodeList = document.getElementsByTagName(name[m]);
-            node = nodeList.item(m);
-//            if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element element = (Element) node;
-                element.appendChild(document.createTextNode(value[m]));
-//            }
         }
 
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
+
         DOMSource domSource = new DOMSource(document);
-        if (Debug) Log.d(TAG, domSource.toString());
-        byte[] result = domSource.toString().getBytes("UTF-8");
-        return android.util.Base64.encodeToString(result, Base64.DEFAULT);
+        StringWriter writer = new StringWriter();
+        StreamResult result = new StreamResult(writer);
+        transformer.transform(domSource, result);
+        if (Debug) Log.d(TAG, writer.toString());
+        byte[] ret = domSource.toString().getBytes("UTF-8");
+        return android.util.Base64.encodeToString(ret, Base64.DEFAULT);
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -191,10 +201,14 @@ public class DomService {
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
+
             DOMSource domSource = new DOMSource(document);
-            if (Debug) Log.d(TAG, domSource.toString());
-            byte[] result = domSource.toString().getBytes("UTF-8");
-            return android.util.Base64.encodeToString(result, Base64.DEFAULT);
+            StringWriter writer = new StringWriter();
+            StreamResult result = new StreamResult(writer);
+            transformer.transform(domSource, result);
+            if (Debug) Log.d(TAG, writer.toString());
+            byte[] ret = domSource.toString().getBytes("UTF-8");
+            return android.util.Base64.encodeToString(ret, Base64.DEFAULT);
         } else {
             byte[] result = upload.toString().getBytes("UTF-8");
             return android.util.Base64.encodeToString(result, Base64.DEFAULT);

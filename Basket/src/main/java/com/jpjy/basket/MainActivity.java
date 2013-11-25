@@ -103,7 +103,7 @@ public class MainActivity extends Activity {
     }
 
     public void writeFile(String fileName, String writestr) throws IOException{
-        if(Debug) Log.d(TAG, "readFile: " + fileName + "\n" + writestr);
+        if(Debug) Log.d(TAG, "writeFile: " + fileName + "\n" + writestr);
         try{
             FileOutputStream fout =openFileOutput(fileName, MODE_PRIVATE);
             byte[] bytes = writestr.getBytes();
@@ -244,6 +244,7 @@ public class MainActivity extends Activity {
                         byte resdata[]=android.util.Base64.decode(dp.getResponseData(), Base64.DEFAULT);
                         try {
                             String data = new String(resdata, "UTF-8");
+                            /*String data = readFile("upload.xml");*/
                             //Save the data to filesystem, will change every time
                             writeFile("data.xml", data);
                             mData = domService.getData(data);
@@ -252,7 +253,6 @@ public class MainActivity extends Activity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
                     } else {
                         if (Debug) Log.d(TAG, "Uploading Data");
                         byte resdata[]=android.util.Base64.decode(dp.getResponseData(), Base64.DEFAULT);
@@ -283,16 +283,12 @@ public class MainActivity extends Activity {
 
                 // Record the open box data to filesystem
                 Upload upload = new Upload();
-
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
                 Date curDate = new Date(System.currentTimeMillis());
                 String str = formatter.format(curDate);
                 upload.setOpenTime(str);
-
                 upload.setOpenType(1);
-
                 upload.setTradeNo(mData.get(i).getTradeNo());
-
                 upload.setBoxNo(mData.get(i).getBoxNo());
                 mUpload.add(upload);
                 try {
@@ -320,16 +316,12 @@ public class MainActivity extends Activity {
 
                 // Record the open box data to filesystem
                 Upload upload = new Upload();
-
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
                 Date curDate = new Date(System.currentTimeMillis());
                 String str = formatter.format(curDate);
                 upload.setOpenTime(str);
-
                 upload.setOpenType(2);
-
                 upload.setTradeNo(mData.get(i).getTradeNo());
-
                 upload.setBoxNo(mData.get(i).getBoxNo());
                 mUpload.add(upload);
                 try {
