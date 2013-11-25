@@ -50,8 +50,16 @@ public class DataPackage {
         this.responseContext = responseContext;
     }
 
+    public String getResponseContext() {
+        return requestData;
+    }
+
     public void setResponseData(String responseData) {
         this.responseData = responseData;
+    }
+
+    public String getResponseData() {
+        return requestData;
     }
 
 }

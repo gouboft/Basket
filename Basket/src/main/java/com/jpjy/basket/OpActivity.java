@@ -20,7 +20,7 @@ public class OpActivity extends Activity {
         new Handler().postDelayed(new Runnable() {
 
             public void run() {
-                Intent intent = new Intent(OpActivity.this, ChioceActivity.class);
+                Intent intent = new Intent(OpActivity.this, ChoiceActivity.class);
                 OpActivity.this.startActivity(intent);
                 OpActivity.this.finish();
             }

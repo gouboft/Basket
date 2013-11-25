@@ -1,42 +1,53 @@
 package com.jpjy.basket;
 
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Handler;
+import android.os.HandlerThread;
 
+import org.apache.http.util.EncodingUtils;
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import android.content.Intent;
 
+import android.util.Base64;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
 public class MainActivity extends Activity {
+    private static final boolean Debug = true;
     private static final String TAG = "MainActivity";
 
     private static final int PASSWORD = 0x0001;
     private static final int RFIDCARD = 0x0010;
+    private static final int TRANSMIT = 0x0100;
 
     private MyApplication myApp;
     private DataPackage dp;
-    private FileInputStream mInputData;
-    private FileInputStream mInputUpload;
+
     private DomService domService;
     private boolean isDownload;
-    private boolean isRun;
+
     private Thread mTransmitThread;
-    private Thread mRfidThread;
+
     private EventHandler mEventHandler;
     private List<Data> mData;
     private List<Upload> mUpload;
@@ -47,6 +58,8 @@ public class MainActivity extends Activity {
     private SerialPort mElecLock;
     private InputStream mBarcodeStream;
     private byte[] mBufferBarcode;
+
+    private HandlerThread ht;
 
 
     @Override
@@ -59,36 +72,70 @@ public class MainActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.welcome);
 
-        new Handler().postDelayed(new Runnable() {
-            public void run() {
-                Intent intent = new Intent(MainActivity.this, ChioceActivity.class);
-                MainActivity.this.startActivity(intent);
-                MainActivity.this.finish();
-            }
-        }, 2000);
+        ht = new HandlerThread("EventHandler");
+        ht.start();
+        mEventHandler = new EventHandler(ht.getLooper());
 
-        mEventHandler = new EventHandler();
         myApp.setHandler(mEventHandler);
-
-        try {
-            mRfidCard = openFileInput("/dev/RFID");
-            mBarcode = myApp.getBarcodeSerialPort();
-            mBarcodeStream = mBarcode.getInputStream();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         domService = new DomService();
 
         isDownload = true;
 
+
         mTransmitThread = new TransmitThread();
         mTransmitThread.start();
 
-        mRfidThread = new CardBarcodeThread();
-        mRfidThread.start();
+        new Handler().postDelayed(new Runnable() {
+            public void run() {
+                Intent intent = new Intent(MainActivity.this, ChoiceActivity.class);
+                MainActivity.this.startActivity(intent);
+                MainActivity.this.finish();
+            }
+        }, 2000);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mTransmitThread.interrupt();
+        mTransmitThread = null;
+    }
+
+    public void writeFile(String fileName, String writestr) throws IOException{
+        if(Debug) Log.d(TAG, "readFile: " + fileName + "\n" + writestr);
+        try{
+            FileOutputStream fout =openFileOutput(fileName, MODE_PRIVATE);
+            byte[] bytes = writestr.getBytes();
+            fout.write(bytes);
+            fout.close();
+        }
+
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+    public String readFile(String fileName) throws IOException {
+
+        String res = new String();
+        try{
+            FileInputStream fin = openFileInput(fileName);
+            if (fin == null)
+                return null;
+            int length = fin.available();
+            byte[] buffer = new byte[length];
+            fin.read(buffer);
+            res = EncodingUtils.getString(buffer, "UTF-8");
+            fin.close();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        if(Debug) Log.d(TAG, "readFile: " + fileName + "\n" + res);
+        return res;
+
     }
 
     private DataPackage generateDataPack(DataPackage dp) {
@@ -104,14 +151,15 @@ public class MainActivity extends Activity {
     }
 
     private DataPackage generateUploadPack(DataPackage dp) {
-        try {
-            mInputUpload = openFileInput("Upload.xml");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
         dp.setServiceName("dataUpLoadService");
+
         try {
-            dp.setRequestData(domService.putRequestData(mInputData));
+            String upload = readFile("upload.xml");
+            if (upload == null)
+                return null;
+            dp.setRequestData(domService.putRequestData(upload));
+        } catch (IOException e) {
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -119,24 +167,23 @@ public class MainActivity extends Activity {
         return dp;
     }
 
-
     private class TransmitThread extends Thread {
         @Override
         public void run() {
             super.run();
             while (!isInterrupted()) {
-                isRun = true;
-                dp = new DataPackage();
-                if (isDownload) {
-                    generateDataPack(dp);
-                } else {
-                    generateUploadPack(dp);
-                }
-                getRemoteInfo(dp);
+
+                if (isDownload)
+                    isDownload = false;
+                else
+                    isDownload = true;
+
+                Message msg = mEventHandler.obtainMessage(TRANSMIT);
+                mEventHandler.sendMessage(msg);
+                if(Debug) Log.d(TAG, "TransmitThread running");
                 try {
-                    isRun = false;
                     // Get the data one time in one minute;
-                    sleep(60000);
+                    sleep(6000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -144,36 +191,84 @@ public class MainActivity extends Activity {
         }
     }
 
-    private class CardBarcodeThread extends Thread {
-        @Override
-        public void run() {
-            super.run();
-            while (true) {
-                try {
-                    mBufferRfid = new byte[4];
-                    //Todo: add barcode and then use poll or select
-
-                    if (mBufferRfid != null)
-                        mRfidCard.read(mBufferRfid);
-                    Message msg = mEventHandler.obtainMessage(RFIDCARD, mBufferRfid.toString());
-                    mEventHandler.sendMessage(msg);
-                    //mBarcode.read(mBufferBarcode);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     final class EventHandler extends Handler {
-        public void handlerMessage(Message msg) {
+        public EventHandler() {
+        }
+
+        public EventHandler(Looper looper) {
+            super(looper);
+        }
+
+        @TargetApi(Build.VERSION_CODES.FROYO)
+        @Override
+        public void handleMessage(Message msg) {
+            if(Debug) Log.d(TAG, "Handle Message");
             super.handleMessage(msg);
             if (msg.what == PASSWORD) {
+                if(Debug) Log.d(TAG, "Handle Password");
                 int password = (Integer) msg.obj;
-                checkPassword(password);
+
+                if (checkPassword(password)) {
+                    Intent intent = new Intent(MainActivity.this, OpenActivity.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, PasswordFailActivity.class);
+                    intent.putExtra("ErrorReason", "密码错误");
+                    startActivity(intent);
+                }
             } else if (msg.what == RFIDCARD) {
+                if(Debug) Log.d(TAG, "Handle Rfid card");
                 String rfidCode = (String) msg.obj;
-                checkRfidCode(rfidCode);
+                if(checkRfidCode(rfidCode)) {
+                    Intent intent = new Intent(MainActivity.this, OpActivity.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, CardFailActivity.class);
+                    intent.putExtra("ErrorReason", "无效卡");
+                    startActivity(intent);
+                }
+            } else if (msg.what == TRANSMIT) {
+                if(Debug) Log.d(TAG, "Handle Transmit");
+                synchronized(this) {
+                    dp = new DataPackage();
+                    if (isDownload) {
+                        generateDataPack(dp);
+                    } else {
+                        if (generateUploadPack(dp) == null)
+                            return;
+                    }
+                    getRemoteInfo(dp);
+
+                    if (isDownload) {
+                        if (Debug) Log.d(TAG, "Downloading Data");
+                        byte resdata[]=android.util.Base64.decode(dp.getResponseData(), Base64.DEFAULT);
+                        try {
+                            String data = new String(resdata, "UTF-8");
+                            //Save the data to filesystem, will change every time
+                            writeFile("data.xml", data);
+                            mData = domService.getData(data);
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    } else {
+                        if (Debug) Log.d(TAG, "Uploading Data");
+                        byte resdata[]=android.util.Base64.decode(dp.getResponseData(), Base64.DEFAULT);
+                        try {
+                            String data = new String(resdata, "UTF-8");
+                            int result = domService.getUpload(data);
+                            if (result != 0) {
+                                Log.d(TAG, "Error occur when upload data, Error code = " + result);
+                            }
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
         }
     }
@@ -182,9 +277,35 @@ public class MainActivity extends Activity {
         for (int i = 0; i < mData.size(); i++) {
             if (rfidcode == mData.get(i).getCardSN()) {
                 int boxno = mData.get(i).getBoxNo();
+
                 //Todo: Open the door of the boxno
                 openDoor(boxno);
+
+                // Record the open box data to filesystem
+                Upload upload = new Upload();
+
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+                Date curDate = new Date(System.currentTimeMillis());
+                String str = formatter.format(curDate);
+                upload.setOpenTime(str);
+
+                upload.setOpenType(1);
+
+                upload.setTradeNo(mData.get(i).getTradeNo());
+
+                upload.setBoxNo(mData.get(i).getBoxNo());
+                mUpload.add(upload);
+                try {
+                    writeFile("upload.xml", domService.putUpload(mUpload));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
+            } else {
+                Message msg = mEventHandler.obtainMessage(TRANSMIT);
+                mEventHandler.sendMessage(msg);
+                msg = mEventHandler.obtainMessage(TRANSMIT, rfidcode);
+                mEventHandler.sendMessage(msg);
             }
         }
         return false;
@@ -196,7 +317,32 @@ public class MainActivity extends Activity {
                 int boxno = mData.get(i).getBoxNo();
                 //Todo: Open the door of the boxno
                 openDoor(boxno);
+
+                // Record the open box data to filesystem
+                Upload upload = new Upload();
+
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+                Date curDate = new Date(System.currentTimeMillis());
+                String str = formatter.format(curDate);
+                upload.setOpenTime(str);
+
+                upload.setOpenType(2);
+
+                upload.setTradeNo(mData.get(i).getTradeNo());
+
+                upload.setBoxNo(mData.get(i).getBoxNo());
+                mUpload.add(upload);
+                try {
+                    writeFile("upload.xml", domService.putUpload(mUpload));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
+            } else {
+                Message msg = mEventHandler.obtainMessage(TRANSMIT);
+                mEventHandler.sendMessage(msg);
+                msg = mEventHandler.obtainMessage(TRANSMIT, password);
+                mEventHandler.sendMessage(msg);
             }
         }
         return false;
@@ -244,7 +390,13 @@ public class MainActivity extends Activity {
         // 获取返回的数据
         SoapObject object = (SoapObject) envelope.bodyIn;
         // 获取返回的结果
-        int serviceResult = Integer.parseInt(object.getProperty("serviceResult").toString());
+        if (object == null)
+            return;
+        String ret = object.getProperty("serviceResult").toString();
+        int serviceResult = 0;
+        Log.d(TAG, "web service return : " + ret);
+        if (ret.length() > 0)
+            serviceResult = Integer.parseInt(ret);
         if (serviceResult == 1) {
             dp.setResponseContext(object.getProperty("responseContext").toString());
             dp.setResponseData(object.getProperty("responseData").toString());

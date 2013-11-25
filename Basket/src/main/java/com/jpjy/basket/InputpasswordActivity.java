@@ -52,7 +52,7 @@ public class InputpasswordActivity extends Activity {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DEL:
                 intent = new Intent(InputpasswordActivity.this,
-                        ChioceActivity.class);
+                        ChoiceActivity.class);
                 startActivity(intent);
                 InputpasswordActivity.this.finish();
                 break;
@@ -68,16 +68,12 @@ public class InputpasswordActivity extends Activity {
             if (password.length() < 6) {
                 Toast.makeText(InputpasswordActivity.this, "输入的密码小于6位", Toast.LENGTH_LONG)
                         .show();
-                intent = new Intent(InputpasswordActivity.this, failActivity.class);
+                intent = new Intent(InputpasswordActivity.this, PasswordFailActivity.class);
+                intent.putExtra("ErrorReason", "输入的密码小于6位");
                 startActivity(intent);
-
-            } else {
+            } else if (password.length() == 6) {
                 Message msg = handler.obtainMessage(PASSWORD, Integer.parseInt(password));
                 handler.sendMessage(msg);
-
-                intent = new Intent(InputpasswordActivity.this, OpenActivity.class);
-                startActivity(intent);
-
             }
             return true;
         }

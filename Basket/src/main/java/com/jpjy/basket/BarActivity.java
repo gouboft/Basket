@@ -27,7 +27,7 @@ public class BarActivity extends Activity {
             case KeyEvent.KEYCODE_1:
 
                 intent = new Intent(BarActivity.this,
-                        ChioceActivity.class);
+                        ChoiceActivity.class);
                 startActivity(intent);
 
                 break;

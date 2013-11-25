@@ -21,7 +21,7 @@ public class OpenActivity extends Activity {
         new Handler().postDelayed(new Runnable() {
 
             public void run() {
-                Intent intent = new Intent(OpenActivity.this, ChioceActivity.class);
+                Intent intent = new Intent(OpenActivity.this, ChoiceActivity.class);
                 OpenActivity.this.startActivity(intent);
                 OpenActivity.this.finish();
             }
