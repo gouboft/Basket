@@ -68,7 +68,7 @@ public class CardFailActivity extends Activity {
             return true;
 
         }
-        //failActivity.this.finish();
+        //CardFailActivity.this.finish();
         return super.dispatchKeyEvent(event);
     }
 

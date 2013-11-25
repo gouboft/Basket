@@ -3,6 +3,11 @@ package com.jpjy.basket;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo.State;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -31,6 +36,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
     private static final boolean Debug = true;
@@ -59,7 +65,7 @@ public class MainActivity extends Activity {
     private InputStream mBarcodeStream;
     private byte[] mBufferBarcode;
 
-    private HandlerThread ht;
+    private boolean isNetworkConnect;
 
 
     @Override
@@ -72,7 +78,7 @@ public class MainActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.welcome);
 
-        ht = new HandlerThread("EventHandler");
+        HandlerThread ht = new HandlerThread("EventHandler");
         ht.start();
         mEventHandler = new EventHandler(ht.getLooper());
 
@@ -81,7 +87,6 @@ public class MainActivity extends Activity {
         domService = new DomService();
 
         isDownload = true;
-
 
         mTransmitThread = new TransmitThread();
         mTransmitThread.start();
@@ -102,6 +107,13 @@ public class MainActivity extends Activity {
         mTransmitThread = null;
     }
 
+    private boolean checkNetworkInfo() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        State mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+        if(mobile == State.CONNECTED)
+            return true;
+        else return false;
+    }
     public void writeFile(String fileName, String writestr) throws IOException{
         if(Debug) Log.d(TAG, "writeFile: " + fileName + "\n" + writestr);
         try{
@@ -115,7 +127,6 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
-
 
     public String readFile(String fileName) throws IOException {
 
@@ -135,7 +146,6 @@ public class MainActivity extends Activity {
         }
         if(Debug) Log.d(TAG, "readFile: " + fileName + "\n" + res);
         return res;
-
     }
 
     private DataPackage generateDataPack(DataPackage dp) {
@@ -237,7 +247,8 @@ public class MainActivity extends Activity {
                         if (generateUploadPack(dp) == null)
                             return;
                     }
-                    getRemoteInfo(dp);
+                    if(checkNetworkInfo())
+                        getRemoteInfo(dp);
 
                     if (isDownload) {
                         if (Debug) Log.d(TAG, "Downloading Data");

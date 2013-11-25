@@ -83,12 +83,9 @@ public class DomService {
         Document document = builder.parse(inputStream);
         // 得到根元素，这里是 DataDownloadResponse
         Element root = document.getDocumentElement();
-
         String result = root.getAttribute("Result");
 
-        if(result == null)
-            return 1;
-        if (Debug) Log.d(TAG, "getUpload = " + result);
+        if (Debug) Log.d(TAG, "getUpload result = " + result + "1");
         return Integer.parseInt(result);
     }
 

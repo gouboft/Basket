@@ -67,7 +67,7 @@ public class PasswordFailActivity extends Activity {
             return true;
 
         }
-        //failActivity.this.finish();
+        //PasswordFailActivity.this.finish();
         return super.dispatchKeyEvent(event);
     }
 
