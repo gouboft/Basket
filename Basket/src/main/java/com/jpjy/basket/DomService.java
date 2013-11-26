@@ -5,16 +5,13 @@ import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
 
-import org.apache.http.util.EncodingUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +24,13 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 public class DomService {
-    private static final boolean Debug = true;
+    private static final boolean Debug = false;
     private static final String TAG = "DomService";
 
     public DomService() {
     }
 
-    public List<Data> getData(String responsedata) throws Exception {
+    public List<Data> getDataResult(String responsedata) throws Exception {
         List<Data> list = null;
 
         InputStream inputStream = new ByteArrayInputStream(responsedata.getBytes());
@@ -76,7 +73,7 @@ public class DomService {
         return list;
     }
 
-    public int getUpload(String responsedata) throws Exception {
+    public int getUploadResult(String responsedata) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         InputStream inputStream = new ByteArrayInputStream(responsedata.getBytes());
@@ -85,7 +82,7 @@ public class DomService {
         Element root = document.getDocumentElement();
         String result = root.getAttribute("Result");
 
-        if (Debug) Log.d(TAG, "getUpload result = " + result + "1");
+        if (Debug) Log.d(TAG, "getUpload result = " + result);
         return Integer.parseInt(result);
     }
 

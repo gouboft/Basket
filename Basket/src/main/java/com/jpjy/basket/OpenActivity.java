@@ -4,12 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 public class OpenActivity extends Activity {
-    Intent intent;
+    private Intent intent;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,8 +18,11 @@ public class OpenActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.open);
 
+        Intent intent = getIntent();
+        int boxNum = intent.getIntExtra("BoxNum", 0);
+        TextView tv = (TextView) findViewById(R.id.___);
+        tv.setText(boxNum);
         new Handler().postDelayed(new Runnable() {
-
             public void run() {
                 Intent intent = new Intent(OpenActivity.this, ChoiceActivity.class);
                 OpenActivity.this.startActivity(intent);

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 public class OpActivity extends Activity {
     Intent intent;
@@ -16,6 +17,11 @@ public class OpActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.ope);
+
+        Intent intent = getIntent();
+        int boxNum = intent.getIntExtra("BoxNum", 0);
+        TextView tv = (TextView) findViewById(R.id.___);
+        tv.setText(boxNum);
 
         new Handler().postDelayed(new Runnable() {
 

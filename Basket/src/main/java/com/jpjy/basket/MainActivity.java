@@ -3,17 +3,20 @@ package com.jpjy.basket;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.State;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.Message;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Base64;
+import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 
 import org.apache.http.util.EncodingUtils;
 import org.ksoap2.SoapEnvelope;
@@ -30,14 +33,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import android.content.Intent;
-
-import android.util.Base64;
-import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
     private static final boolean Debug = true;
@@ -79,10 +74,11 @@ public class MainActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.welcome);
 
+
+
         HandlerThread ht = new HandlerThread("EventHandler");
         ht.start();
         mEventHandler = new EventHandler(ht.getLooper());
-
         myApp.setHandler(mEventHandler);
 
         domService = new DomService();
@@ -92,7 +88,12 @@ public class MainActivity extends Activity {
         mTransmitThread = new TransmitThread();
         mTransmitThread.start();
 
-
+        try {
+            mData = domService.getDataResult(readFile("data.xml"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mUpload = new ArrayList<Upload>();
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 Intent intent = new Intent(MainActivity.this, ChoiceActivity.class);
@@ -110,15 +111,13 @@ public class MainActivity extends Activity {
     }
 
     private boolean checkNetworkInfo() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm;
+        cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         //Todo: WIFI -> MOBILE
         State mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-        if(mobile == State.CONNECTED)
-            return true;
-        else return false;
+        return mobile == State.CONNECTED;
     }
     public void writeFile(String fileName, String writestr) throws IOException{
-        if(Debug) Log.d(TAG, "writeFile: " + fileName + "\n" + writestr);
         try{
             FileOutputStream fout = openFileOutput(fileName, MODE_PRIVATE);
             byte[] bytes = writestr.getBytes();
@@ -147,7 +146,6 @@ public class MainActivity extends Activity {
         catch(Exception e){
             e.printStackTrace();
         }
-        if(Debug) Log.d(TAG, "readFile: " + fileName + "\n" + res);
         return res;
     }
 
@@ -188,7 +186,7 @@ public class MainActivity extends Activity {
         public void run() {
             super.run();
             while (!isInterrupted()) {
-
+                if(Debug) Log.d(TAG, "TransmitThread running");
                 if (isDownload)
                     isDownload = false;
                 else
@@ -196,10 +194,10 @@ public class MainActivity extends Activity {
 
                 Message msg = mEventHandler.obtainMessage(TRANSMIT);
                 mEventHandler.sendMessage(msg);
-                if(Debug) Log.d(TAG, "TransmitThread running");
+
                 try {
                     // Get the data one time in one minute;
-                    sleep(60000);
+                    Thread.sleep(600000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -208,9 +206,6 @@ public class MainActivity extends Activity {
     }
 
     final class EventHandler extends Handler {
-        public EventHandler() {
-        }
-
         public EventHandler(Looper looper) {
             super(looper);
         }
@@ -223,11 +218,12 @@ public class MainActivity extends Activity {
             if (msg.what == PASSWORD) {
                 if(Debug) Log.d(TAG, "Handle Password");
                 int password = (Integer) msg.obj;
-
-                if (checkPassword(password)) {
+                int boxNum = checkPassword(password);
+                if (boxNum > 0) {
                     Intent intent = new Intent(MainActivity.this, OpenActivity.class);
+                    intent.putExtra("BoxNum", boxNum);
                     startActivity(intent);
-                } else {
+                } else if (boxNum == 0) {
                     Intent intent = new Intent(MainActivity.this, PasswordFailActivity.class);
                     intent.putExtra("ErrorReason", "密码错误");
                     startActivity(intent);
@@ -235,10 +231,12 @@ public class MainActivity extends Activity {
             } else if (msg.what == RFIDCARD) {
                 if(Debug) Log.d(TAG, "Handle Rfid card");
                 String rfidCode = (String) msg.obj;
-                if(checkRfidCode(rfidCode)) {
+                int boxNum = checkRfidCode(rfidCode);
+                if(boxNum > 0) {
                     Intent intent = new Intent(MainActivity.this, OpActivity.class);
+                    intent.putExtra("BoxNum", boxNum);
                     startActivity(intent);
-                } else {
+                } else if(boxNum == 0) {
                     Intent intent = new Intent(MainActivity.this, CardFailActivity.class);
                     intent.putExtra("ErrorReason", "无效卡");
                     startActivity(intent);
@@ -266,8 +264,7 @@ public class MainActivity extends Activity {
                             String data = new String(resdata, "UTF-8");
                             //Save the data to filesystem, will change every time
                             writeFile("data.xml", data);
-//                            data = readFile("data.xml");
-                            mData = domService.getData(data);
+                            mData = domService.getDataResult(data);
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         } catch (Exception e) {
@@ -279,10 +276,9 @@ public class MainActivity extends Activity {
                                 Base64.DEFAULT);
                         try {
                             String data = new String(resdata, "UTF-8");
-                            Log.d(TAG, data);
-                            int result = domService.getUpload(data);
+                            int result = domService.getUploadResult(data);
                             if (result != 0) {
-                                Log.d(TAG, "Error occur when upload data, Error code = " + result);
+                                Log.e(TAG, "Error occur when upload data, Error code = " + result);
                             }
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
@@ -295,17 +291,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    private boolean checkRfidCode(String rfidcode) {
+    private int checkRfidCode(String rfidcode) {
+        int boxNum;
         for (Data data : mData) {
-            if (rfidcode == data.getCardSN()) {
-                int boxno = data.getBoxNo();
-                int flag = data.getFLAG();
-                if (flag == 0)
-                    return false;
-                else
-                    data.setFLAG(0);
+            if (rfidcode.equals(data.getCardSN())) {
+                boxNum = data.getBoxNo();
+                //Remove the data from the list because it is used
+                mData.remove(data);
 
-                openDoor(boxno);
+                openDoor(boxNum);
 
                 // Record the open box data to filesystem
                 Upload upload = new Upload();
@@ -322,7 +316,7 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                return true;
+                return boxNum;
             } else {
                 Message msg = mEventHandler.obtainMessage(TRANSMIT);
                 mEventHandler.sendMessage(msg);
@@ -330,22 +324,19 @@ public class MainActivity extends Activity {
                 mEventHandler.sendMessage(msg);
             }
         }
-        return false;
+        return 0;
     }
 
-    private boolean checkPassword(int password) {
+    private int checkPassword(int password) {
         dumpData();
+        int boxNum;
         for (Data data : mData) {
             if (password == data.getPassword()) {
-                int boxno = data.getBoxNo();
-                // Set the door open flag had been open
-                int flag = data.getFLAG();
-                if (flag == 0)
-                    return false;
-                else
-                    data.setFLAG(0);
+                boxNum = data.getBoxNo();
+                //Remove the data from the list because it is used
+                mData.remove(data);
 
-                openDoor(boxno);
+                openDoor(boxNum);
 
                 // Record the open box data to filesystem
                 Upload upload = new Upload();
@@ -362,7 +353,7 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                return true;
+                return boxNum;
             } else {
                 Message msg = mEventHandler.obtainMessage(TRANSMIT);
                 mEventHandler.sendMessage(msg);
@@ -370,12 +361,12 @@ public class MainActivity extends Activity {
                 mEventHandler.sendMessage(msg);
             }
         }
-        return false;
+        return 0;
     }
 
     private void openDoor(int doorNo) {
         //Todo: 实现这个函数
-        Log.d(TAG, "The Door which the No. is " + doorNo + "is open!");
+        Log.d(TAG, "The number of the door  " + doorNo + " is open!");
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -393,7 +384,7 @@ public class MainActivity extends Activity {
         SoapObject rpc = new SoapObject(nameSpace, methodName);
 
         // 设置需调用WebService接口需要传入的两个参数mobileCode、userId
-        if (Debug) {
+        if (false) {
             Log.d(TAG, "$serviceName$ = " + dp.getServiceName());
             Log.d(TAG, "$requestContext$:");
             decodeBase64(dp.getRequestContext());
@@ -429,8 +420,6 @@ public class MainActivity extends Activity {
             return;
         }
 
-        Log.d(TAG, "WebService return: " + object.toString());
-        Log.d(TAG, "serviceResult = " + object.getProperty("serviceResult").toString());
         int serviceResult = Integer.parseInt(object.getProperty("serviceResult").toString());
         if (serviceResult == 0) {
             dp.setResponseContext(object.getProperty("responseContext").toString());
@@ -464,13 +453,15 @@ public class MainActivity extends Activity {
 
 
     private void dumpData() {
+        if (mData.equals(null))
+            return;
         Log.d(TAG, "The number mData have ------- " + mData.size() + " ------- Data");
         for (int i = 0; i < mData.size(); i++) {
             Data data = mData.get(i);
 
             Log.d(TAG, "mData[" + i + "]:" );
-            Log.d(TAG, "\t" + data.getTradeNo());
-            Log.d(TAG, "\t" + data.getFLAG());
+            Log.d(TAG, "\tTradeNo\t" + data.getTradeNo());
+            Log.d(TAG, "\tFLAG\t" + data.getFLAG());
         }
     }
 

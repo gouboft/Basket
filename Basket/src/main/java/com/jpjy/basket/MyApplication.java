@@ -17,14 +17,12 @@
 package com.jpjy.basket;
 
 import android.app.Application;
-import android.content.SharedPreferences;
+
+import com.jpjy.basket.MainActivity.EventHandler;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.logging.Handler;
-
-import com.jpjy.basket.MainActivity.EventHandler;
 
 public class MyApplication extends Application {
 

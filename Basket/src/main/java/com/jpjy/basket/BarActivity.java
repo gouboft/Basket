@@ -16,8 +16,6 @@ public class BarActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.barcode);
-
-
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {

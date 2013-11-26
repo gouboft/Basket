@@ -5,13 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class PasswordFailActivity extends Activity {
 
@@ -39,7 +35,7 @@ public class PasswordFailActivity extends Activity {
                     PasswordFailActivity.this.finish();
                 }
             }
-        }, 20000);
+        }, 5000);
 
     }
 
@@ -58,7 +54,8 @@ public class PasswordFailActivity extends Activity {
     }
 
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+        if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                && event.getAction() != KeyEvent.ACTION_UP) {
             isInput = true;
             intent = new Intent(PasswordFailActivity.this,
                     InputpasswordActivity.class);
