@@ -24,7 +24,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 public class DomService {
-    private static final boolean Debug = false;
+    private static final boolean Debug = true;
     private static final String TAG = "DomService";
 
     public DomService() {
@@ -107,7 +107,9 @@ public class DomService {
                 Element elementNode = (Element) node;
                 elementNode.setAttribute("OpenTime", list.get(k).getOpenTime());
                 elementNode.setAttribute("OpenType", String.valueOf(list.get(k).getOpenType()));
+                elementNode.setAttribute("OptCardNo", String.valueOf(list.get(k).getOptCardNo()));
                 elementNode.setAttribute("TradeNo", list.get(k).getTradeNo());
+                elementNode.setAttribute("password", String.valueOf(list.get(k).getPassword()));
                 elementNode.setAttribute("BoxNo", String.valueOf(list.get(k).getBoxNo()));
                 elementNode.setAttribute("FLAG", String.valueOf(list.get(k).getFLAG()));
             }

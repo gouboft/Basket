@@ -333,21 +333,13 @@ public class MainActivity extends Activity {
         for (Data data : mData) {
             if (password == data.getPassword()) {
                 boxNum = data.getBoxNo();
-                //Remove the data from the list because it is used
-                mData.remove(data);
 
                 openDoor(boxNum);
 
                 // Record the open box data to filesystem
-                Upload upload = new Upload();
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-                Date curDate = new Date(System.currentTimeMillis());
-                String str = formatter.format(curDate);
-                upload.setOpenTime(str);
-                upload.setOpenType(2);
-                upload.setTradeNo(data.getTradeNo());
-                upload.setBoxNo(data.getBoxNo());
-                mUpload.add(upload);
+                mUpload.add(generateUpload(data));
+                //Remove the data from the list because it is used
+                mData.remove(data);
                 try {
                     writeFile("upload.xml", domService.putUpload(mUpload));
                 } catch (Exception e) {
@@ -362,6 +354,20 @@ public class MainActivity extends Activity {
             }
         }
         return 0;
+    }
+
+    private Upload generateUpload(Data data) {
+        Upload upload = new Upload();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        Date curDate = new Date(System.currentTimeMillis());
+        String str = formatter.format(curDate);
+        upload.setOpenTime(str);
+        upload.setOpenType(2);
+        upload.setPassword(data.getPassword());
+        upload.setTradeNo(data.getTradeNo());
+        upload.setBoxNo(data.getBoxNo());
+        upload.setFLAG(data.getFLAG());
+        return upload;
     }
 
     private void openDoor(int doorNo) {
@@ -386,10 +392,8 @@ public class MainActivity extends Activity {
         // 设置需调用WebService接口需要传入的两个参数mobileCode、userId
         if (false) {
             Log.d(TAG, "$serviceName$ = " + dp.getServiceName());
-            Log.d(TAG, "$requestContext$:");
-            decodeBase64(dp.getRequestContext());
-            Log.d(TAG, "$requestData$:");
-            decodeBase64(dp.getRequestData());
+            Log.d(TAG, "$requestContext$:"+ decodeBase64(dp.getRequestContext()));
+            Log.d(TAG, "$requestData$:" + decodeBase64(dp.getRequestData()));
         }
         rpc.addProperty("serviceName", dp.getServiceName());
         rpc.addProperty("requestContext", dp.getRequestContext());
@@ -423,16 +427,12 @@ public class MainActivity extends Activity {
         int serviceResult = Integer.parseInt(object.getProperty("serviceResult").toString());
         if (serviceResult == 0) {
             dp.setResponseContext(object.getProperty("responseContext").toString());
+            if (Debug) Log.d(TAG, "ResponseContext = "+ decodeBase64(dp.getResponseContext()));
             dp.setResponseData(object.getProperty("responseData").toString());
         } else {
-            byte resdata[] = android.util.Base64.decode(
-                    object.getProperty("responseContext").toString(),
-                    Base64.DEFAULT);
+            String string = decodeBase64(dp.getResponseContext());
             try {
-                String data = new String(resdata, "UTF-8");
-                Log.e(TAG, "Server return a error: " + domService.getResponseContext(data));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Server return a error: " + domService.getResponseContext(string));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -440,7 +440,7 @@ public class MainActivity extends Activity {
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
-    private void decodeBase64(String string) {
+    private String decodeBase64(String string) {
         byte resdata[] = android.util.Base64.decode(string, Base64.DEFAULT);
         String string1 = null;
         try {
@@ -448,7 +448,7 @@ public class MainActivity extends Activity {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        Log.d(TAG, string1);
+        return string1;
     }
 
 

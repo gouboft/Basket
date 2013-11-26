@@ -18,10 +18,10 @@ public class OpActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.ope);
 
-        Intent intent = getIntent();
+/*        Intent intent = getIntent();
         int boxNum = intent.getIntExtra("BoxNum", 0);
-        TextView tv = (TextView) findViewById(R.id.___);
-        tv.setText(boxNum);
+        TextView tv = (TextView) findViewById(R.id.ou);
+        tv.setText(boxNum);*/
 
         new Handler().postDelayed(new Runnable() {
 

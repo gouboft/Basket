@@ -6,28 +6,19 @@ package com.jpjy.basket;
 public class Upload {
     private String OpenTime;
     private int OpenType;
-    private String TradeNo;
     private int BoxNo;
+    private String OptCardNo;
+    private String TradeNo;
+    private int Password;
     private int FLAG;
 
-    public Upload(String OpenTime, int OpenType, String TradeNo, int BoxNo, int FLAG) {
-        super();
-        this.TradeNo = OpenTime;
-        this.OpenType = OpenType;
-        this.TradeNo = TradeNo;
-        this.BoxNo = BoxNo;
-        this.FLAG = FLAG;
-    }
-
     public Upload() {
-        super();
     }
 
     // OpenTime
     public String getOpenTime() {
         return OpenTime;
     }
-
     public void setOpenTime(String OpenTime) {
         this.OpenTime = OpenTime;
     }
@@ -36,34 +27,46 @@ public class Upload {
     public int getOpenType() {
         return OpenType;
     }
-
     public void setOpenType(int OpenType) {
         this.OpenType = OpenType;
-    }
-
-    // TradeNo
-    public String getTradeNo() {
-        return TradeNo;
-    }
-
-    public void setTradeNo(String TradeNo) {
-        this.TradeNo = TradeNo;
     }
 
     // BoxNo
     public int getBoxNo() {
         return BoxNo;
     }
-
     public void setBoxNo(int BoxNo) {
         this.BoxNo = BoxNo;
+    }
+
+    // OptCardNo
+    public String getOptCardNo() {
+        return OptCardNo;
+    }
+    public void setOptCardNo(String OptCardNo) {
+        this.OptCardNo = OptCardNo;
+    }
+
+    // TradeNo
+    public String getTradeNo() {
+        return TradeNo;
+    }
+    public void setTradeNo(String TradeNo) {
+        this.TradeNo = TradeNo;
+    }
+
+    // Password
+    public int getPassword() {
+        return Password;
+    }
+    public void setPassword(int Password) {
+        this.Password = Password;
     }
 
     // FLAG
     public int getFLAG() {
         return FLAG;
     }
-
     public void setFLAG(int FLAG) {
         this.FLAG = FLAG;
     }
