@@ -11,11 +11,8 @@ public class DataPackage {
     private String requestData;
     private String responseContext;
     private String responseData;
-    private DomService dm;
 
     public DataPackage() {
-        dm = new DomService();
-        setRequestContext();
     }
 
     public void setServiceName(String serviceName) {
@@ -26,16 +23,12 @@ public class DataPackage {
         return serviceName;
     }
 
-    public void setRequestContext() {
-        try {
-            this.requestContext = dm.putRequestContext();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void setRequestContext(String requestContext) {
+        this.requestContext = requestContext;
     }
 
     public String getRequestContext() {
-        return responseContext;
+        return requestContext;
     }
 
     public void setRequestData(String requestData) {
@@ -51,7 +44,7 @@ public class DataPackage {
     }
 
     public String getResponseContext() {
-        return requestData;
+        return responseContext;
     }
 
     public void setResponseData(String responseData) {
@@ -59,7 +52,7 @@ public class DataPackage {
     }
 
     public String getResponseData() {
-        return requestData;
+        return responseData;
     }
 
 }

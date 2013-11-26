@@ -177,8 +177,8 @@ public class DomService {
         StringWriter writer = new StringWriter();
         StreamResult result = new StreamResult(writer);
         transformer.transform(domSource, result);
-        if (Debug) Log.d(TAG, writer.toString());
-        byte[] ret = domSource.toString().getBytes("UTF-8");
+        if (Debug) Log.d(TAG, "requestContext = " + writer.toString());
+        byte[] ret = writer.toString().getBytes("UTF-8");
         return android.util.Base64.encodeToString(ret, Base64.DEFAULT);
     }
 
@@ -203,18 +203,43 @@ public class DomService {
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
             transformer.transform(domSource, result);
-            if (Debug) Log.d(TAG, writer.toString());
-            byte[] ret = domSource.toString().getBytes("UTF-8");
+            if (Debug) Log.d(TAG, "RequestData = " + writer.toString());
+            byte[] ret = writer.toString().getBytes("UTF-8");
             return android.util.Base64.encodeToString(ret, Base64.DEFAULT);
         } else {
+            if (Debug) Log.d(TAG, "RequestData = " + upload);
             byte[] result = upload.toString().getBytes("UTF-8");
             return android.util.Base64.encodeToString(result, Base64.DEFAULT);
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.FROYO)
+    public String getResponseContext(String responseContext) throws Exception {
+        List<String> list = null;
+
+        InputStream inputStream = new ByteArrayInputStream(responseContext.getBytes());
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(inputStream);
+        // 得到根元素，这里是 DataDownloadResponse
+        Element root = document.getDocumentElement();
+        // 得到一个集合，里面存放xml文件中所有的 Data
+        NodeList nodeList = root.getElementsByTagName("ResponseMessage");
+
+        if (nodeList == null || nodeList.getLength() == 0) {
+            return null;
+        }
+        // 初始化
+        list = new ArrayList<String>();
+        Element element = (Element) nodeList.item(0);
+        String responseMesage = element.getTextContent();
+
+        return responseMesage;
+    }
+
     private String getTerminalNo() {
         //Todo: get this from the property
-        return "20120001";
+        return "1029384756";
     }
 
     private String getLicenceNo() {

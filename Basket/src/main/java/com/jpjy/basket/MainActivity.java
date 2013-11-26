@@ -87,7 +87,7 @@ public class MainActivity extends Activity {
 
         domService = new DomService();
         mUpload = new ArrayList<Upload>();
-        isDownload = true;
+        isDownload = false;
 
         mTransmitThread = new TransmitThread();
         mTransmitThread.start();
@@ -111,6 +111,7 @@ public class MainActivity extends Activity {
 
     private boolean checkNetworkInfo() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        //Todo: WIFI -> MOBILE
         State mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
         if(mobile == State.CONNECTED)
             return true;
@@ -119,7 +120,7 @@ public class MainActivity extends Activity {
     public void writeFile(String fileName, String writestr) throws IOException{
         if(Debug) Log.d(TAG, "writeFile: " + fileName + "\n" + writestr);
         try{
-            FileOutputStream fout =openFileOutput(fileName, MODE_PRIVATE);
+            FileOutputStream fout = openFileOutput(fileName, MODE_PRIVATE);
             byte[] bytes = writestr.getBytes();
             fout.write(bytes);
             fout.close();
@@ -151,9 +152,10 @@ public class MainActivity extends Activity {
     }
 
     private DataPackage generateDataPack(DataPackage dp) {
-
         dp.setServiceName("dataDownLoadService");
+
         try {
+            dp.setRequestContext(domService.putRequestContext());
             dp.setRequestData(domService.putRequestData(null));
         } catch (Exception e) {
             e.printStackTrace();
@@ -166,9 +168,11 @@ public class MainActivity extends Activity {
         dp.setServiceName("dataUpLoadService");
 
         try {
-            String upload = readFile("upload.xml");
+            String upload;
+            upload = readFile("upload.xml");
             if (upload == null)
                 return null;
+            dp.setRequestContext(domService.putRequestContext());
             dp.setRequestData(domService.putRequestData(upload));
         } catch (IOException e) {
             e.printStackTrace();
@@ -251,16 +255,18 @@ public class MainActivity extends Activity {
                     }
                     if(checkNetworkInfo())
                         getRemoteInfo(dp);
+                    if(dp.getResponseData() == null)
+                        return;
 
                     if (isDownload) {
                         if (Debug) Log.d(TAG, "Downloading Data");
-                        byte resdata[]=android.util.Base64.decode(dp.getResponseData(), Base64.DEFAULT);
+                        byte resdata[] = android.util.Base64.decode(dp.getResponseData(),
+                                Base64.DEFAULT);
                         try {
                             String data = new String(resdata, "UTF-8");
-                            /*String data = readFile("upload.xml");*/
                             //Save the data to filesystem, will change every time
-                            //writeFile("data.xml", data);
-                            data = readFile("data.xml");
+                            writeFile("data.xml", data);
+//                            data = readFile("data.xml");
                             mData = domService.getData(data);
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
@@ -269,9 +275,11 @@ public class MainActivity extends Activity {
                         }
                     } else {
                         if (Debug) Log.d(TAG, "Uploading Data");
-                        byte resdata[]=android.util.Base64.decode(dp.getResponseData(), Base64.DEFAULT);
+                        byte resdata[] = android.util.Base64.decode(dp.getResponseData(),
+                                Base64.DEFAULT);
                         try {
                             String data = new String(resdata, "UTF-8");
+                            Log.d(TAG, data);
                             int result = domService.getUpload(data);
                             if (result != 0) {
                                 Log.d(TAG, "Error occur when upload data, Error code = " + result);
@@ -288,8 +296,7 @@ public class MainActivity extends Activity {
     }
 
     private boolean checkRfidCode(String rfidcode) {
-        for (int i = 0; i < mData.size(); i++) {
-            Data data = mData.get(i);
+        for (Data data : mData) {
             if (rfidcode == data.getCardSN()) {
                 int boxno = data.getBoxNo();
                 int flag = data.getFLAG();
@@ -327,8 +334,8 @@ public class MainActivity extends Activity {
     }
 
     private boolean checkPassword(int password) {
-        for (int i = 0; i < mData.size(); i++) {
-            Data data = mData.get(i);
+        dumpData();
+        for (Data data : mData) {
             if (password == data.getPassword()) {
                 int boxno = data.getBoxNo();
                 // Set the door open flag had been open
@@ -371,20 +378,28 @@ public class MainActivity extends Activity {
         Log.d(TAG, "The Door which the No. is " + doorNo + "is open!");
     }
 
+    @TargetApi(Build.VERSION_CODES.FROYO)
     private void getRemoteInfo(DataPackage dp) {
         // 命名空间
-        String nameSpace = "http://118.144.127.105:5005";
+        String nameSpace = "http://soap.webservice.scaffold.goldenvista.com/";
         // 调用的方法名称
-        String methodName = "";
+        String methodName = "service";
         // EndPoint
-        String endPoint = "http://118.144.127.105:5005/BoxService/webservice/soap";
+        String endPoint = "http://118.144.127.105:5005/Box_Service/webservice/soap";
         // SOAP Action
-        String soapAction = "http://118.144.127.105:505/dataDownLoadService";
+        String soapAction = "http://soap.webservice.scaffold.goldenvista.com/service";
 
         // 指定WebService的命名空间和调用的方法名
         SoapObject rpc = new SoapObject(nameSpace, methodName);
 
         // 设置需调用WebService接口需要传入的两个参数mobileCode、userId
+        if (Debug) {
+            Log.d(TAG, "$serviceName$ = " + dp.getServiceName());
+            Log.d(TAG, "$requestContext$:");
+            decodeBase64(dp.getRequestContext());
+            Log.d(TAG, "$requestData$:");
+            decodeBase64(dp.getRequestData());
+        }
         rpc.addProperty("serviceName", dp.getServiceName());
         rpc.addProperty("requestContext", dp.getRequestContext());
         rpc.addProperty("requestData", dp.getRequestData());
@@ -394,7 +409,7 @@ public class MainActivity extends Activity {
 
         envelope.bodyOut = rpc;
         // 设置是否调用的是dotNet开发的WebService
-        envelope.dotNet = true;
+        envelope.dotNet = false;
         // 等价于envelope.bodyOut = rpc;
         envelope.setOutputSoapObject(rpc);
 
@@ -409,18 +424,54 @@ public class MainActivity extends Activity {
         // 获取返回的数据
         SoapObject object = (SoapObject) envelope.bodyIn;
         // 获取返回的结果
-        if (object == null)
+        if (object == null) {
+            Log.e(TAG, "Server Error");
             return;
-        String ret = object.getProperty("serviceResult").toString();
-        int serviceResult = 0;
-        Log.d(TAG, "web service return : " + ret);
-        if (ret.length() > 0)
-            serviceResult = Integer.parseInt(ret);
-        if (serviceResult == 1) {
+        }
+
+        Log.d(TAG, "WebService return: " + object.toString());
+        Log.d(TAG, "serviceResult = " + object.getProperty("serviceResult").toString());
+        int serviceResult = Integer.parseInt(object.getProperty("serviceResult").toString());
+        if (serviceResult == 0) {
             dp.setResponseContext(object.getProperty("responseContext").toString());
             dp.setResponseData(object.getProperty("responseData").toString());
+        } else {
+            byte resdata[] = android.util.Base64.decode(
+                    object.getProperty("responseContext").toString(),
+                    Base64.DEFAULT);
+            try {
+                String data = new String(resdata, "UTF-8");
+                Log.e(TAG, "Server return a error: " + domService.getResponseContext(data));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.FROYO)
+    private void decodeBase64(String string) {
+        byte resdata[] = android.util.Base64.decode(string, Base64.DEFAULT);
+        String string1 = null;
+        try {
+            string1 = new String(resdata, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, string1);
+    }
+
+
+    private void dumpData() {
+        Log.d(TAG, "The number mData have ------- " + mData.size() + " ------- Data");
+        for (int i = 0; i < mData.size(); i++) {
+            Data data = mData.get(i);
+
+            Log.d(TAG, "mData[" + i + "]:" );
+            Log.d(TAG, "\t" + data.getTradeNo());
+            Log.d(TAG, "\t" + data.getFLAG());
+        }
+    }
 
 }
