@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -85,11 +86,12 @@ public class MainActivity extends Activity {
         myApp.setHandler(mEventHandler);
 
         domService = new DomService();
-
+        mUpload = new ArrayList<Upload>();
         isDownload = true;
 
         mTransmitThread = new TransmitThread();
         mTransmitThread.start();
+
 
         new Handler().postDelayed(new Runnable() {
             public void run() {
@@ -193,7 +195,7 @@ public class MainActivity extends Activity {
                 if(Debug) Log.d(TAG, "TransmitThread running");
                 try {
                     // Get the data one time in one minute;
-                    sleep(6000);
+                    sleep(60000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -257,7 +259,8 @@ public class MainActivity extends Activity {
                             String data = new String(resdata, "UTF-8");
                             /*String data = readFile("upload.xml");*/
                             //Save the data to filesystem, will change every time
-                            writeFile("data.xml", data);
+                            //writeFile("data.xml", data);
+                            data = readFile("data.xml");
                             mData = domService.getData(data);
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
@@ -286,10 +289,15 @@ public class MainActivity extends Activity {
 
     private boolean checkRfidCode(String rfidcode) {
         for (int i = 0; i < mData.size(); i++) {
-            if (rfidcode == mData.get(i).getCardSN()) {
-                int boxno = mData.get(i).getBoxNo();
+            Data data = mData.get(i);
+            if (rfidcode == data.getCardSN()) {
+                int boxno = data.getBoxNo();
+                int flag = data.getFLAG();
+                if (flag == 0)
+                    return false;
+                else
+                    data.setFLAG(0);
 
-                //Todo: Open the door of the boxno
                 openDoor(boxno);
 
                 // Record the open box data to filesystem
@@ -299,8 +307,8 @@ public class MainActivity extends Activity {
                 String str = formatter.format(curDate);
                 upload.setOpenTime(str);
                 upload.setOpenType(1);
-                upload.setTradeNo(mData.get(i).getTradeNo());
-                upload.setBoxNo(mData.get(i).getBoxNo());
+                upload.setTradeNo(data.getTradeNo());
+                upload.setBoxNo(data.getBoxNo());
                 mUpload.add(upload);
                 try {
                     writeFile("upload.xml", domService.putUpload(mUpload));
@@ -320,9 +328,16 @@ public class MainActivity extends Activity {
 
     private boolean checkPassword(int password) {
         for (int i = 0; i < mData.size(); i++) {
-            if (password == mData.get(i).getPassword()) {
-                int boxno = mData.get(i).getBoxNo();
-                //Todo: Open the door of the boxno
+            Data data = mData.get(i);
+            if (password == data.getPassword()) {
+                int boxno = data.getBoxNo();
+                // Set the door open flag had been open
+                int flag = data.getFLAG();
+                if (flag == 0)
+                    return false;
+                else
+                    data.setFLAG(0);
+
                 openDoor(boxno);
 
                 // Record the open box data to filesystem
@@ -332,8 +347,8 @@ public class MainActivity extends Activity {
                 String str = formatter.format(curDate);
                 upload.setOpenTime(str);
                 upload.setOpenType(2);
-                upload.setTradeNo(mData.get(i).getTradeNo());
-                upload.setBoxNo(mData.get(i).getBoxNo());
+                upload.setTradeNo(data.getTradeNo());
+                upload.setBoxNo(data.getBoxNo());
                 mUpload.add(upload);
                 try {
                     writeFile("upload.xml", domService.putUpload(mUpload));
@@ -353,6 +368,7 @@ public class MainActivity extends Activity {
 
     private void openDoor(int doorNo) {
         //Todo: 实现这个函数
+        Log.d(TAG, "The Door which the No. is " + doorNo + "is open!");
     }
 
     private void getRemoteInfo(DataPackage dp) {

@@ -124,8 +124,8 @@ public class DomService {
         StreamResult result = new StreamResult(writer);
         transformer.transform(domSource, result);
         if (Debug) Log.d(TAG, writer.toString());
-        byte[] ret = domSource.toString().getBytes("UTF-8");
-        return android.util.Base64.encodeToString(ret, Base64.DEFAULT);
+
+        return writer.toString();
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
