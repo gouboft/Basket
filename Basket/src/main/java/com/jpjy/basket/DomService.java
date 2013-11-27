@@ -236,6 +236,36 @@ public class DomService {
         return responseMesage;
     }
 
+    public List<Upload> getUpload(String uploaded) throws Exception {
+        List<Upload> list = null;
+
+        InputStream inputStream = new ByteArrayInputStream(uploaded.getBytes());
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(inputStream);
+        // 得到根元素，这里是 DataDownloadResponse
+        Element root = document.getDocumentElement();
+        // 得到一个集合，里面存放xml文件中所有的 Data
+        NodeList nodeList = root.getElementsByTagName("Upload");
+
+        if (nodeList == null || nodeList.getLength() == 0) {
+            return null;
+        }
+        // 初始化
+        list = new ArrayList<Upload>();
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            // xml中的Data标签
+            Element element = (Element) nodeList.item(i);
+            Upload upload = new Upload();
+
+            String tradeNo = element.getAttribute("TradeNo");
+            upload.setTradeNo(tradeNo);
+
+            list.add(upload);
+        }
+        return list;
+    }
     private String getTerminalNo() {
         //Todo: get this from the property
         return "1029384756";

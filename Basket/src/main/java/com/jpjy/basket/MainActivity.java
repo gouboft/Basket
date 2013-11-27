@@ -187,10 +187,8 @@ public class MainActivity extends Activity {
             super.run();
             while (!isInterrupted()) {
                 if(Debug) Log.d(TAG, "TransmitThread running");
-                if (isDownload)
-                    isDownload = false;
-                else
-                    isDownload = true;
+                //alternate between upload and download
+                isDownload = !isDownload;
 
                 Message msg = mEventHandler.obtainMessage(TRANSMIT);
                 mEventHandler.sendMessage(msg);
@@ -278,7 +276,6 @@ public class MainActivity extends Activity {
                         return;
 
                     if (isDownload) {
-                        if (Debug) Log.d(TAG, "Downloading Data");
                         byte resdata[] = android.util.Base64.decode(dp.getResponseData(),
                                 Base64.DEFAULT);
                         try {
@@ -292,16 +289,28 @@ public class MainActivity extends Activity {
                             e.printStackTrace();
                         }
                     } else {
-                        if (Debug) Log.d(TAG, "Uploading Data");
-                        byte resdata[] = android.util.Base64.decode(dp.getResponseData(),
-                                Base64.DEFAULT);
+                        String result = decodeBase64(dp.getResponseData());
                         try {
-                            String data = new String(resdata, "UTF-8");
-                            int result = domService.getUploadResult(data);
-                            if (result != 0) {
+                            if (domService.getUploadResult(result) != 0) {
                                 Log.e(TAG, "Error occur when upload data, Error code = " + result);
+                                return;
                             }
-                        } catch (UnsupportedEncodingException e) {
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        //Upload success,remove the uploaded Upload in mUpload
+                        try {
+                            String ul = readFile("upload.xml");
+                            List<Upload> uploadedList = domService.getUpload(ul);
+                            for (Upload uploaded : uploadedList) {
+                                for (Upload upload : mUpload)
+                                    if (uploaded.getTradeNo().equals(upload.getTradeNo())) {
+                                        mUpload.remove(upload);
+                                    }
+                            }
+                            dumpUpload();
+                        } catch (IOException e) {
                             e.printStackTrace();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -317,21 +326,13 @@ public class MainActivity extends Activity {
         for (Data data : mData) {
             if (rfidcode.equals(data.getCardSN())) {
                 boxNum = data.getBoxNo();
-                //Remove the data from the list because it is used
-                mData.remove(data);
 
                 openDoor(boxNum);
 
                 // Record the passwordopen box data to filesystem
-                Upload upload = new Upload();
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-                Date curDate = new Date(System.currentTimeMillis());
-                String str = formatter.format(curDate);
-                upload.setOpenTime(str);
-                upload.setOpenType(1);
-                upload.setTradeNo(data.getTradeNo());
-                upload.setBoxNo(data.getBoxNo());
-                mUpload.add(upload);
+                mUpload.add(generateUpload(1, data));
+                //Remove the data from the list because it is used
+                mData.remove(data);
                 try {
                     writeFile("upload.xml", domService.putUpload(mUpload));
                 } catch (Exception e) {
@@ -358,7 +359,7 @@ public class MainActivity extends Activity {
                 openDoor(boxNum);
 
                 // Record the passwordopen box data to filesystem
-                mUpload.add(generateUpload(data));
+                mUpload.add(generateUpload(2, data));
                 //Remove the data from the list because it is used
                 mData.remove(data);
                 try {
@@ -368,6 +369,7 @@ public class MainActivity extends Activity {
                 }
                 return boxNum;
             } else {
+                //TODO check it
                 Message msg = mEventHandler.obtainMessage(TRANSMIT);
                 mEventHandler.sendMessage(msg);
                 msg = mEventHandler.obtainMessage(TRANSMIT, password);
@@ -377,14 +379,15 @@ public class MainActivity extends Activity {
         return 0;
     }
 
-    private Upload generateUpload(Data data) {
+    private Upload generateUpload(int openType, Data data) {
         Upload upload = new Upload();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         Date curDate = new Date(System.currentTimeMillis());
         String str = formatter.format(curDate);
         upload.setOpenTime(str);
-        upload.setOpenType(2);
+        upload.setOpenType(openType);
         upload.setPassword(data.getPassword());
+        upload.setOptCardNo(data.getCardSN());
         upload.setTradeNo(data.getTradeNo());
         upload.setBoxNo(data.getBoxNo());
         upload.setFLAG(data.getFLAG());
@@ -501,6 +504,18 @@ public class MainActivity extends Activity {
             Log.d(TAG, "mData[" + i + "]:" );
             Log.d(TAG, "\tTradeNo\t" + data.getTradeNo());
             Log.d(TAG, "\tFLAG\t" + data.getFLAG());
+        }
+    }
+
+    private void dumpUpload() {
+        if (mUpload.equals(""))
+            return;
+        Log.d(TAG, "The number of mUpload have ------- " + mUpload.size() + " ------- Upload");
+        for (int i = 0; i < mUpload.size(); i++) {
+            Upload upload = mUpload.get(i);
+
+            Log.d(TAG, "mUpload[" + i + "]:" );
+            Log.d(TAG, "\tTradeNo\t" + upload.getTradeNo());
         }
     }
 
