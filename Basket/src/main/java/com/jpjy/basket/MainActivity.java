@@ -24,6 +24,7 @@ import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -88,11 +89,13 @@ public class MainActivity extends Activity {
         mTransmitThread = new TransmitThread();
         mTransmitThread.start();
 
+
         try {
             mData = domService.getDataResult(readFile("data.xml"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         mUpload = new ArrayList<Upload>();
         new Handler().postDelayed(new Runnable() {
             public void run() {
@@ -117,10 +120,11 @@ public class MainActivity extends Activity {
         State mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
         return mobile == State.CONNECTED;
     }
-    public void writeFile(String fileName, String writestr) throws IOException{
+
+    public void writeFile(String fileName, String writeStr) throws IOException{
         try{
             FileOutputStream fout = openFileOutput(fileName, MODE_PRIVATE);
-            byte[] bytes = writestr.getBytes();
+            byte[] bytes = writeStr.getBytes();
             fout.write(bytes);
             fout.close();
         }
@@ -131,12 +135,10 @@ public class MainActivity extends Activity {
     }
 
     public String readFile(String fileName) throws IOException {
-
-        String res = new String();
+        String res = "";
         try{
             FileInputStream fin = openFileInput(fileName);
-            if (fin == null)
-                return null;
+
             int length = fin.available();
             byte[] buffer = new byte[length];
             fin.read(buffer);
@@ -149,7 +151,7 @@ public class MainActivity extends Activity {
         return res;
     }
 
-    private DataPackage generateDataPack(DataPackage dp) {
+    private void generateDataPack(DataPackage dp) {
         dp.setServiceName("dataDownLoadService");
 
         try {
@@ -158,18 +160,15 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return dp;
     }
 
-    private DataPackage generateUploadPack(DataPackage dp) {
+    private void generateUploadPack(DataPackage dp) {
         dp.setServiceName("dataUpLoadService");
 
         try {
             String upload;
             upload = readFile("upload.xml");
-            if (upload == null)
-                return null;
+
             dp.setRequestContext(domService.putRequestContext());
             dp.setRequestData(domService.putRequestData(upload));
         } catch (IOException e) {
@@ -177,8 +176,6 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return dp;
     }
 
     private class TransmitThread extends Thread {
@@ -248,12 +245,15 @@ public class MainActivity extends Activity {
                     if (isDownload) {
                         generateDataPack(dp);
                     } else {
-                        if (generateUploadPack(dp) == null)
+                        generateUploadPack(dp);
+
+                        if (dp.getRequestData().equals("")) {
                             return;
+                        }
                     }
                     if(checkNetworkInfo())
                         getRemoteInfo(dp);
-                    if(dp.getResponseData() == null)
+                    if(dp.getResponseData().equals(""))
                         return;
 
                     if (isDownload) {
@@ -424,27 +424,47 @@ public class MainActivity extends Activity {
             return;
         }
 
-        int serviceResult = Integer.parseInt(object.getProperty("serviceResult").toString());
-        if (serviceResult == 0) {
-            dp.setResponseContext(object.getProperty("responseContext").toString());
-            if (Debug) Log.d(TAG, "ResponseContext = "+ decodeBase64(dp.getResponseContext()));
-            dp.setResponseData(object.getProperty("responseData").toString());
-        } else {
-            String string = decodeBase64(dp.getResponseContext());
+        String serviceResult = object.getPropertySafelyAsString("serviceResult");
+        String responseContext = object.getPropertySafelyAsString("responseContext");
+        String responseData = object.getPropertySafelyAsString("responseData");
+
+        if (serviceResult.equals(null)) {
+            Log.e(TAG, "Maybe Server Error, No serviceResult return!");
+            return;
+        }
+
+        int sr = Integer.parseInt(serviceResult);
+        if (sr == 0 && !responseContext.equals("")) {
+            dp.setResponseContext(responseContext);
+            if (Debug) Log.d(TAG, "ResponseContext = "+ decodeBase64(responseContext));
+        } else if (sr != 0 && !responseContext.equals("")){
+            // Server return a error, we print the error
+            String string = decodeBase64(responseContext);
             try {
                 Log.e(TAG, "Server return a error: " + domService.getResponseContext(string));
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            // No responseData return when server return a error
+            return;
+        }
+
+        if (!responseData.equals("")) {
+            dp.setResponseData(responseData);
+            if (Debug) Log.d(TAG, "ResponseData = " + decodeBase64(responseData));
+        } else {
+            // We set the value even if there is no data in responseData
+            dp.setResponseData("");
+            Log.e(TAG, "Server Error, no ResponseData return");
         }
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
     private String decodeBase64(String string) {
-        byte resdata[] = android.util.Base64.decode(string, Base64.DEFAULT);
+        byte[] result = android.util.Base64.decode(string, Base64.DEFAULT);
         String string1 = null;
         try {
-            string1 = new String(resdata, "UTF-8");
+            string1 = new String(result, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -453,7 +473,7 @@ public class MainActivity extends Activity {
 
 
     private void dumpData() {
-        if (mData.equals(null))
+        if (mData.equals(""))
             return;
         Log.d(TAG, "The number mData have ------- " + mData.size() + " ------- Data");
         for (int i = 0; i < mData.size(); i++) {
