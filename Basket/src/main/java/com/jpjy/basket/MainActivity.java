@@ -117,7 +117,10 @@ public class MainActivity extends Activity {
         ConnectivityManager cm;
         cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         //Todo: WIFI -> MOBILE
+
         State mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+        if (mobile.equals(null))
+            return false;
         return mobile == State.CONNECTED;
     }
 
@@ -268,6 +271,9 @@ public class MainActivity extends Activity {
                     }
                     if(checkNetworkInfo())
                         getRemoteInfo(dp);
+                    else
+                        return;
+
                     if(dp.getResponseData().equals(""))
                         return;
 
@@ -434,7 +440,7 @@ public class MainActivity extends Activity {
         // 获取返回的数据
         SoapObject object = (SoapObject) envelope.bodyIn;
         // 获取返回的结果
-        if (object == null) {
+        if (object.equals(null)) {
             Log.e(TAG, "Server Error");
             return;
         }
