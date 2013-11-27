@@ -274,7 +274,7 @@ public class MainActivity extends Activity {
                     else
                         return;
 
-                    if(dp.getResponseData().equals(""))
+                    if(dp.getResponseData() == null)
                         return;
 
                     if (isDownload) {
@@ -440,7 +440,7 @@ public class MainActivity extends Activity {
         // 获取返回的数据
         SoapObject object = (SoapObject) envelope.bodyIn;
         // 获取返回的结果
-        if (object.equals(null)) {
+        if (object == null) {
             Log.e(TAG, "Server Error");
             return;
         }
@@ -449,7 +449,7 @@ public class MainActivity extends Activity {
         String responseContext = object.getPropertySafelyAsString("responseContext");
         String responseData = object.getPropertySafelyAsString("responseData");
 
-        if (serviceResult.equals(null)) {
+        if (serviceResult == null) {
             Log.e(TAG, "Maybe Server Error, No serviceResult return!");
             return;
         }
@@ -474,9 +474,7 @@ public class MainActivity extends Activity {
             dp.setResponseData(responseData);
             if (Debug) Log.d(TAG, "ResponseData = " + decodeBase64(responseData));
         } else {
-            // We set the value even if there is no data in responseData
-            dp.setResponseData("");
-            Log.e(TAG, "Server Error, no ResponseData return");
+            Log.e(TAG, "Error, no ResponseData return");
         }
     }
 

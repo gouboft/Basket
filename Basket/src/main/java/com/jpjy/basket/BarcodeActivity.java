@@ -93,10 +93,14 @@ public class BarcodeActivity extends Activity {
         public void run() {
             super.run();
             while (!isInterrupted()) {
+                mBarcode = "";
                 mBarcode = Linuxc.receiveMsgUart();
                 isInput = true;
-                Message msg = mEventHandler.obtainMessage(BARCODE, mBarcode);
-                mEventHandler.sendMessage(msg);
+                Log.d(TAG, "Barcode = " + mBarcode);
+                if (mBarcode != null) {
+                    Message msg = mEventHandler.obtainMessage(BARCODE, mBarcode);
+                    mEventHandler.sendMessage(msg);
+                }
             }
         }
     }

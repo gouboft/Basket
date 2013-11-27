@@ -17,11 +17,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class RfidcardActivity extends Activity {
-    private Intent intent;
     private static final int RFIDCARD = 0x0010;
     private static final String TAG = "SwipeActivity";
     private RfidThread mRfidThread;
-    private MyApplication myApplication;
     private EventHandler mEventHandler;
 
     private FileInputStream mRfidCard;
@@ -36,7 +34,7 @@ public class RfidcardActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.rfidcard);
 
-        myApplication = (MyApplication) getApplication();
+        MyApplication myApplication = (MyApplication) getApplication();
         mEventHandler = myApplication.getHandler();
 
         new Handler().postDelayed(new Runnable() {
@@ -54,8 +52,7 @@ public class RfidcardActivity extends Activity {
         super.onResume();
         Log.d(TAG, "onResume");
         try {
-            //mRfidCard = new FileInputStream("/dev/rfid_rc522_dev");
-            mRfidCard = new FileInputStream("/dev/kmsg");
+            mRfidCard = new FileInputStream("/dev/rfid_rc522_dev");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -79,7 +76,7 @@ public class RfidcardActivity extends Activity {
         isInput = true;
         switch (keyCode) {
             case KeyEvent.KEYCODE_DEL:
-                intent = new Intent(RfidcardActivity.this,
+                Intent intent = new Intent(RfidcardActivity.this,
                         ChoiceActivity.class);
                 startActivity(intent);
                 RfidcardActivity.this.finish();
@@ -102,7 +99,6 @@ public class RfidcardActivity extends Activity {
                         Message msg = mEventHandler.obtainMessage(RFIDCARD, BufferRfid.toString());
                         mEventHandler.sendMessage(msg);
                     }
-                    //mBarcode.read(mBufferBarcode);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
