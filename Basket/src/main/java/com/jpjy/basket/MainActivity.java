@@ -222,6 +222,19 @@ public class MainActivity extends Activity {
                     intent.putExtra("BoxNum", boxNum);
                     startActivity(intent);
                 } else if (boxNum == 0) {
+                    Log.d(TAG, "111111111111111111111111111");
+                    Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
+                    mEventHandler.sendMessage(msg1);
+                    //TODO: wait server return
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    msg1 = mEventHandler.obtainMessage(PASSWORD, password);
+                    mEventHandler.sendMessage(msg1);
+
                     Intent intent = new Intent(MainActivity.this, PasswordFailActivity.class);
                     intent.putExtra("ErrorReason", "密码错误");
                     startActivity(intent);
@@ -339,11 +352,6 @@ public class MainActivity extends Activity {
                     e.printStackTrace();
                 }
                 return boxNum;
-            } else {
-                Message msg = mEventHandler.obtainMessage(TRANSMIT);
-                mEventHandler.sendMessage(msg);
-                msg = mEventHandler.obtainMessage(TRANSMIT, rfidcode);
-                mEventHandler.sendMessage(msg);
             }
         }
         return 0;
@@ -368,13 +376,7 @@ public class MainActivity extends Activity {
                     e.printStackTrace();
                 }
                 return boxNum;
-            } else {
-                //TODO check it
-                Message msg = mEventHandler.obtainMessage(TRANSMIT);
-                mEventHandler.sendMessage(msg);
-                msg = mEventHandler.obtainMessage(TRANSMIT, password);
-                mEventHandler.sendMessage(msg);
-            }
+
         }
         return 0;
     }
