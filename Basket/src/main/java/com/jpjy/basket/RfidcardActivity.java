@@ -34,7 +34,7 @@ public class RfidcardActivity extends Activity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.swipe);
+        setContentView(R.layout.rfidcard);
 
         myApplication = (MyApplication) getApplication();
         mEventHandler = myApplication.getHandler();

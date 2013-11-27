@@ -29,7 +29,7 @@ public class PasswordActivity extends Activity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.inputpassword);
+        setContentView(R.layout.password);
 
         myApplication = (MyApplication) getApplication();
         handler = myApplication.getHandler();
