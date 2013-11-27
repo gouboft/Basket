@@ -28,17 +28,17 @@ public class ChoiceActivity extends Activity {
         switch (keyCode) {
             case KeyEvent.KEYCODE_1:
                 intent = new Intent(ChoiceActivity.this,
-                        InputpasswordActivity.class);
+                        PasswordActivity.class);
                 startActivity(intent);
                 break;
             case KeyEvent.KEYCODE_2:
                 intent = new Intent(ChoiceActivity.this,
-                        SwipeActivity.class);
+                        RfidcardActivity.class);
                 startActivity(intent);
                 break;
             case KeyEvent.KEYCODE_3:
                 intent = new Intent(ChoiceActivity.this,
-                        BarActivity.class);
+                        BarcodeActivity.class);
                 startActivity(intent);
                 break;
         }

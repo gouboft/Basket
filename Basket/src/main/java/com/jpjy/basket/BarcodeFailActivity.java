@@ -9,8 +9,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-public class PasswordFailActivity extends Activity {
-
+public class BarcodeFailActivity extends Activity {
     private Intent intent;
     private boolean isInput = false;
 
@@ -19,10 +18,11 @@ public class PasswordFailActivity extends Activity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.passwordfail);
+        setContentView(R.layout.barcodefail);
 
         Intent intent = getIntent();
         String er = intent.getStringExtra("ErrorReason");
+
         TextView tv = (TextView) findViewById(R.id.ou);
         tv.setText(er);
 
@@ -30,12 +30,12 @@ public class PasswordFailActivity extends Activity {
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 if (!isInput) {
-                    Intent intent = new Intent(PasswordFailActivity.this, ChoiceActivity.class);
-                    PasswordFailActivity.this.startActivity(intent);
-                    PasswordFailActivity.this.finish();
+                    Intent intent = new Intent(BarcodeFailActivity.this, ChoiceActivity.class);
+                    BarcodeFailActivity.this.startActivity(intent);
+                    BarcodeFailActivity.this.finish();
                 }
             }
-        }, 5000);
+        }, 20000);
 
     }
 
@@ -44,10 +44,10 @@ public class PasswordFailActivity extends Activity {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DEL:
                 isInput = true;
-                intent = new Intent(PasswordFailActivity.this,
-                        PasswordActivity.class);
+                intent = new Intent(BarcodeFailActivity.this,
+                        ChoiceActivity.class);
                 startActivity(intent);
-                PasswordFailActivity.this.finish();
+                BarcodeFailActivity.this.finish();
                 break;
         }
         return true;
@@ -57,14 +57,14 @@ public class PasswordFailActivity extends Activity {
         if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER
                 && event.getAction() != KeyEvent.ACTION_UP) {
             isInput = true;
-            intent = new Intent(PasswordFailActivity.this,
-                    PasswordActivity.class);
+            intent = new Intent(BarcodeFailActivity.this,
+                    BarcodeActivity.class);
             startActivity(intent);
 
             return true;
 
         }
-        //PasswordFailActivity.this.finish();
+        //CardFailActivity.this.finish();
         return super.dispatchKeyEvent(event);
     }
 

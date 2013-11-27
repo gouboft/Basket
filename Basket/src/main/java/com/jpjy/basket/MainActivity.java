@@ -42,6 +42,7 @@ public class MainActivity extends Activity {
     private static final int PASSWORD = 0x0001;
     private static final int RFIDCARD = 0x0010;
     private static final int TRANSMIT = 0x0100;
+    private static final int BARCODE = 0x1000;
 
     private MyApplication myApp;
     private DataPackage dp;
@@ -57,8 +58,7 @@ public class MainActivity extends Activity {
 
     private FileInputStream mRfidCard;
     private byte[] mBufferRfid;
-    private SerialPort mBarcode;
-    private SerialPort mElecLock;
+
     private InputStream mBarcodeStream;
     private byte[] mBufferBarcode;
 
@@ -217,7 +217,7 @@ public class MainActivity extends Activity {
                 int password = (Integer) msg.obj;
                 int boxNum = checkPassword(password);
                 if (boxNum > 0) {
-                    Intent intent = new Intent(MainActivity.this, OpenActivity.class);
+                    Intent intent = new Intent(MainActivity.this, PasswordOpenActivity.class);
                     intent.putExtra("BoxNum", boxNum);
                     startActivity(intent);
                 } else if (boxNum == 0) {
@@ -230,12 +230,27 @@ public class MainActivity extends Activity {
                 String rfidCode = (String) msg.obj;
                 int boxNum = checkRfidCode(rfidCode);
                 if(boxNum > 0) {
-                    Intent intent = new Intent(MainActivity.this, OpActivity.class);
+                    Intent intent = new Intent(MainActivity.this, RfidcardOpenActivity.class);
                     intent.putExtra("BoxNum", boxNum);
                     startActivity(intent);
                 } else if(boxNum == 0) {
-                    Intent intent = new Intent(MainActivity.this, CardFailActivity.class);
+                    Intent intent = new Intent(MainActivity.this, RfidcardFailActivity.class);
                     intent.putExtra("ErrorReason", "无效卡");
+                    startActivity(intent);
+                }
+            }else if (msg.what == BARCODE) {
+                if(Debug) Log.d(TAG, "Handle BarCode");
+                String barCode = (String) msg.obj;
+                //TODO change to barcode
+                int boxNum = 01;//checkBarCode(barCode);
+                if(boxNum > 0) {
+
+                    Intent intent = new Intent(MainActivity.this, BarcodeOpenActivity.class);
+                    intent.putExtra("BoxNum", boxNum);
+                    startActivity(intent);
+                } else if(boxNum == 0) {
+                    Intent intent = new Intent(MainActivity.this, BarcodeFailActivity.class);
+                    intent.putExtra("ErrorReason", "无效条码");
                     startActivity(intent);
                 }
             } else if (msg.what == TRANSMIT) {
@@ -301,7 +316,7 @@ public class MainActivity extends Activity {
 
                 openDoor(boxNum);
 
-                // Record the open box data to filesystem
+                // Record the passwordopen box data to filesystem
                 Upload upload = new Upload();
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
                 Date curDate = new Date(System.currentTimeMillis());
@@ -336,7 +351,7 @@ public class MainActivity extends Activity {
 
                 openDoor(boxNum);
 
-                // Record the open box data to filesystem
+                // Record the passwordopen box data to filesystem
                 mUpload.add(generateUpload(data));
                 //Remove the data from the list because it is used
                 mData.remove(data);

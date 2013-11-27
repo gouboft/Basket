@@ -25,28 +25,24 @@
             </intent-filter>
         </activity>
         <activity android:name="ChoiceActivity">
-
         </activity>
-        <activity android:name="SwipeActivity">
-
+        <activity android:name="BarcodeActivity">
         </activity>
-        <activity android:name="InputpasswordActivity">
-
+        <activity android:name="BarcodeOpenActivity">
         </activity>
-        <activity android:name="CardFailActivity">
-
+        <activity android:name="BarcodeFailActivity">
+        </activity>
+        <activity android:name="PasswordActivity">
+        </activity>
+        <activity android:name="PasswordOpenActivity">
         </activity>
         <activity android:name="PasswordFailActivity">
-
         </activity>
-        <activity android:name="OpenActivity">
-
+        <activity android:name="RfidcardActivity">
         </activity>
-        <activity android:name="BarActivity">
-
+        <activity android:name="RfidcardFailActivity">
         </activity>
-        <activity android:name="OpActivity">
-
+        <activity android:name="RfidcardOpenActivity">
         </activity>
     </application>
 

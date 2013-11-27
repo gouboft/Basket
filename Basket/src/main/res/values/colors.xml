@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-     
+
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
     <color name="blue">#0a5d9f</color>
@@ -10,14 +10,14 @@
     <color name="blue4">#234a69</color>
     <color name="brown1">#f1f0ee</color>
     <color name="brown2">#b5b0ac</color>
-     <color name="brown3">#c0c8b9</color>
-     <color name="brown4">#e2e7e0</color>
-     <color name="brown5">#d3cfcc</color>
-     <color name="brown6">#cfcbc8</color>
-     <color name="green">#9caf9b</color>
-     <color name="green1">#40a235</color>
-     <color name="red">#e31919</color>
-     <color name="red1">#de4712</color>
-     <color name="red2">#de640f</color>
-     <color name="green2">#3c9038</color>
+    <color name="brown3">#c0c8b9</color>
+    <color name="brown4">#e2e7e0</color>
+    <color name="brown5">#d3cfcc</color>
+    <color name="brown6">#cfcbc8</color>
+    <color name="green">#9caf9b</color>
+    <color name="green1">#40a235</color>
+    <color name="red">#e31919</color>
+    <color name="red1">#de4712</color>
+    <color name="red2">#de640f</color>
+    <color name="green2">#3c9038</color>
 </resources>
