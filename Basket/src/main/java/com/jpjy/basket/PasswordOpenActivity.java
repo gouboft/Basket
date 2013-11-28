@@ -21,7 +21,8 @@ public class PasswordOpenActivity extends Activity {
         Intent intent = getIntent();
         int boxNum = intent.getIntExtra("BoxNum", 0);
         TextView tv = (TextView) findViewById(R.id.in1);
-        tv.setText(boxNum);
+        tv.setText(String.valueOf(boxNum));
+
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 Intent intent = new Intent(PasswordOpenActivity.this, ChoiceActivity.class);

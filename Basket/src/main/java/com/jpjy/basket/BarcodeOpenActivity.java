@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 public class BarcodeOpenActivity extends Activity {
     private Intent intent;
@@ -17,10 +18,11 @@ public class BarcodeOpenActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.rfidcardopen);
 
-/*        Intent intent = getIntent();
+        Intent intent = getIntent();
         int boxNum = intent.getIntExtra("BoxNum", 0);
-        TextView tv = (TextView) findViewById(R.id.ou);
-        tv.setText(boxNum);*/
+        TextView tv = (TextView) findViewById(R.id.in1);
+        tv.setText(String.valueOf(boxNum));
+
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 Intent intent = new Intent(BarcodeOpenActivity.this, ChoiceActivity.class);
