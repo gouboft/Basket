@@ -16,7 +16,7 @@
 
 #include <sys/time.h> 
 
-#include <cutils/log.h>
+#include <android/log.h>
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "", __VA_ARGS__))
 
 #undef  TCSAFLUSH
@@ -162,7 +162,6 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendMsgUart(JNIEnv *env,jobje
 
     LOGI("jni write to %s data to devices !",buf) ;
     (*env)->ReleaseStringUTFChars(env, str, buf);
-    return 0;
 }
 
 

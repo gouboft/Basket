@@ -93,13 +93,18 @@ public class RfidcardActivity extends Activity {
                 try {
                     byte[] BufferRfid = new byte[4];
 
-                    if (mRfidCard == null) {
+                    if (mRfidCard != null) {
                         mRfidCard.read(BufferRfid);
                         isInput = true;
                         Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, BufferRfid.toString());
                         mEventHandler.sendMessage(msg);
+                    } else {
+                        Thread.sleep(1000);
                     }
+
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
