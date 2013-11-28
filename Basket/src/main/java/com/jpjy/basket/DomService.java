@@ -24,7 +24,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 public class DomService {
-    private static final boolean Debug = true;
+    private static final boolean Debug = false;
     private static final String TAG = "DomService";
 
     public DomService() {

@@ -128,7 +128,7 @@ public class MainActivity extends Activity {
         //Todo: WIFI -> MOBILE
 
         State mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-        if (mobile.equals(null))
+        if (mobile == null)
             return false;
         return mobile == State.CONNECTED;
     }
@@ -282,14 +282,14 @@ public class MainActivity extends Activity {
                 } else if (msg.what == RFIDCARD) {
                     if (Debug) Log.d(TAG, "Handle Rfid card");
                     String rfidCode = (String) msg.obj;
-                    int tag = msg.arg1;
+                    int flag = msg.arg1;
                     int boxNum = checkRfidCode(rfidCode);
                     if (boxNum > 0) {
                         Intent intent = new Intent(MainActivity.this, RfidcardOpenActivity.class);
                         intent.putExtra("BoxNum", boxNum);
                         startActivity(intent);
                     } else if (boxNum == 0) {
-                        if (tag == 0) {
+                        if (flag == 0) {
                             mWaitingFlag = RFIDCARD;
                             isDownload = true;
                             Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
@@ -340,8 +340,24 @@ public class MainActivity extends Activity {
                     }
                     if (checkNetworkInfo())
                         getRemoteInfo(dp);
-                    else
+                    else {
+                        if (mWaitingFlag == PASSWORD) {
+                            mWaitingFlag = 0;
+                            //arg1 == 1, will not try again when password is incorrect
+                            Message msg1 = mEventHandler.obtainMessage(PASSWORD, 1, 0, passwordRecord);
+                            mEventHandler.sendMessage(msg1);
+
+                        } else if (mWaitingFlag == RFIDCARD) {
+                            mWaitingFlag = 0;
+                            Message msg1 = mEventHandler.obtainMessage(RFIDCARD, 1, 0, rfidcardRecord);
+                            mEventHandler.sendMessage(msg1);
+                        } else if (mWaitingFlag == BARCODE) {
+                            mWaitingFlag = 0;
+                            Message msg1 = mEventHandler.obtainMessage(BARCODE, 1, 0, barcodeRecord);
+                            mEventHandler.sendMessage(msg1);
+                        }
                         return;
+                    }
 
                     if (dp.getResponseData() == null)
                         return;

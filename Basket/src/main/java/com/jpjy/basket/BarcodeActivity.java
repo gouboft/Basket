@@ -36,7 +36,7 @@ public class BarcodeActivity extends Activity {
             mBarcodeThread = new BarcodeThread();
         mBarcodeThread.start();
 
-        fd = Linuxc.openUart("/dev/ttyS1");
+        fd = Linuxc.openUart("/dev/ttyS6");
         if(fd > 0) {
             Linuxc.setUart(9600);
             Log.d(TAG, "ttyS6 is open");
@@ -73,6 +73,7 @@ public class BarcodeActivity extends Activity {
             mBarcodeThread.interrupt();
             mBarcodeThread = null;
         }
+        finish();
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -95,10 +96,10 @@ public class BarcodeActivity extends Activity {
             while (!isInterrupted()) {
                 mBarcode = "";
                 mBarcode = Linuxc.receiveMsgUart();
-                isInput = true;
                 Log.d(TAG, "Barcode = " + mBarcode);
-                if (mBarcode != null) {
-                    Message msg = mEventHandler.obtainMessage(BARCODE, mBarcode);
+                if (mBarcode.length() > 4) {
+                    isInput = true;
+                    Message msg = mEventHandler.obtainMessage(BARCODE, 0, 0, mBarcode);
                     mEventHandler.sendMessage(msg);
                 }
             }

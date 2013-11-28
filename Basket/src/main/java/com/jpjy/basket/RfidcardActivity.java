@@ -70,6 +70,7 @@ public class RfidcardActivity extends Activity {
             mRfidThread.interrupt();
             mRfidThread = null;
         }
+        finish();
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -94,20 +95,25 @@ public class RfidcardActivity extends Activity {
                     byte[] BufferRfid = new byte[4];
 
                     if (mRfidCard != null) {
-                        mRfidCard.read(BufferRfid);
+                        int num = mRfidCard.read(BufferRfid);
+                            String result = Integer.toHexString(byte2int(BufferRfid)).toUpperCase();
+                        if (num != 4)
+                            return;
+                        Log.d(TAG, "RFID card number is " + result);
                         isInput = true;
-                        Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, BufferRfid.toString());
+                        Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, result);
                         mEventHandler.sendMessage(msg);
-                    } else {
-                        Thread.sleep(1000);
                     }
-
                 } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    private static int byte2int(byte[] res) {
+        int targets = (res[3] & 0xff) | ((res[2] << 8) & 0xff00)
+                | ((res[1] << 24) >>> 8) | (res[0] << 24);
+        return targets;
     }
 }
