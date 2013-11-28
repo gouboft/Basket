@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class RfidcardActivity extends Activity {
     private static final int RFIDCARD = 0x0010;
-    private static final String TAG = "SwipeActivity";
+    private static final String TAG = "RfidcardActivity";
     private RfidThread mRfidThread;
     private EventHandler mEventHandler;
 
@@ -93,10 +93,10 @@ public class RfidcardActivity extends Activity {
                 try {
                     byte[] BufferRfid = new byte[4];
 
-                    if (!mRfidCard.equals(null)) {
+                    if (mRfidCard == null) {
                         mRfidCard.read(BufferRfid);
                         isInput = true;
-                        Message msg = mEventHandler.obtainMessage(RFIDCARD, BufferRfid.toString());
+                        Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, BufferRfid.toString());
                         mEventHandler.sendMessage(msg);
                     }
                 } catch (IOException e) {

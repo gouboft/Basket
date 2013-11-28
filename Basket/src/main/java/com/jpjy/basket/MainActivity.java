@@ -24,7 +24,6 @@ import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,14 +49,16 @@ public class MainActivity extends Activity {
     private DomService domService;
     private boolean isDownload;
 
-    private Thread mTransmitThread;
+    private Thread mDownloadThread;
+    private Thread mUploadThread;
 
     private EventHandler mEventHandler;
     private List<Data> mData;
     private List<Upload> mUpload;
-    private boolean mWaitingFlag;
-    private int passwordRecord;
+    private int mWaitingFlag;
+    private String passwordRecord;
     private String rfidcardRecord;
+    private String barcodeRecord;
 
     private FileInputStream mRfidCard;
     private byte[] mBufferRfid;
@@ -79,7 +80,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.welcome);
 
 
-
         HandlerThread ht = new HandlerThread("EventHandler");
         ht.start();
         mEventHandler = new EventHandler(ht.getLooper());
@@ -87,11 +87,14 @@ public class MainActivity extends Activity {
 
         domService = new DomService();
         mUpload = new ArrayList<Upload>();
-        isDownload = false;
+        mData = new ArrayList<Data>();
+        isDownload = true;
 
-        mTransmitThread = new TransmitThread();
-        mTransmitThread.start();
+        mDownloadThread = new DownloadThread();
+        mDownloadThread.start();
 
+        mUploadThread = new UploadThread();
+        mUploadThread.start();
 
         try {
             mData = domService.getDataResult(readFile("data.xml"));
@@ -104,7 +107,6 @@ public class MainActivity extends Activity {
             public void run() {
                 Intent intent = new Intent(MainActivity.this, ChoiceActivity.class);
                 MainActivity.this.startActivity(intent);
-                MainActivity.this.finish();
             }
         }, 2000);
     }
@@ -112,8 +114,12 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mTransmitThread.interrupt();
-        mTransmitThread = null;
+        if (Debug) Log.d(TAG, "onDestroy()");
+        mDownloadThread.interrupt();
+        mDownloadThread = null;
+        mUploadThread.interrupt();
+        mUploadThread = null;
+        finish();
     }
 
     private boolean checkNetworkInfo() {
@@ -127,22 +133,20 @@ public class MainActivity extends Activity {
         return mobile == State.CONNECTED;
     }
 
-    public void writeFile(String fileName, String writeStr) throws IOException{
-        try{
+    public void writeFile(String fileName, String writeStr) throws IOException {
+        try {
             FileOutputStream fout = openFileOutput(fileName, MODE_PRIVATE);
             byte[] bytes = writeStr.getBytes();
             fout.write(bytes);
             fout.close();
-        }
-
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public String readFile(String fileName) throws IOException {
         String res = "";
-        try{
+        try {
             FileInputStream fin = openFileInput(fileName);
 
             int length = fin.available();
@@ -150,8 +154,7 @@ public class MainActivity extends Activity {
             fin.read(buffer);
             res = EncodingUtils.getString(buffer, "UTF-8");
             fin.close();
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return res;
@@ -184,26 +187,55 @@ public class MainActivity extends Activity {
         }
     }
 
-    private class TransmitThread extends Thread {
+    private class DownloadThread extends Thread {
         @Override
         public void run() {
             super.run();
             while (!isInterrupted()) {
-                if(Debug) Log.d(TAG, "TransmitThread running");
-                //alternate between upload and download
-                isDownload = !isDownload;
+                if (Debug) Log.d(TAG, "DownloadThread running");
+                //download
+                isDownload = true;
 
                 Message msg = mEventHandler.obtainMessage(TRANSMIT);
                 mEventHandler.sendMessage(msg);
 
                 try {
-                    // Get the data one time in one minute;
-                    Thread.sleep(600000);
+                    Thread.sleep(60000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    private class UploadThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            while (!isInterrupted()) {
+                if (Debug) Log.d(TAG, "UploadThread running");
+                //upload
+                isDownload = false;
+
+                Message msg = mEventHandler.obtainMessage(TRANSMIT);
+                mEventHandler.sendMessage(msg);
+
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private boolean isNumeric(String str) {
+        for (int i = str.length();--i >= 0;) {
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     final class EventHandler extends Handler {
@@ -214,60 +246,88 @@ public class MainActivity extends Activity {
         @TargetApi(Build.VERSION_CODES.FROYO)
         @Override
         public void handleMessage(Message msg) {
-            if(Debug) Log.d(TAG, "Handle Message");
+            if (Debug) Log.d(TAG, "Handle Message");
             super.handleMessage(msg);
-            if (msg.what == PASSWORD) {
-                if(Debug) Log.d(TAG, "Handle Password");
-                int password = (Integer) msg.obj;
-                int boxNum = checkPassword(password);
-                if (boxNum > 0) {
-                    Intent intent = new Intent(MainActivity.this, PasswordOpenActivity.class);
-                    intent.putExtra("BoxNum", boxNum);
-                    startActivity(intent);
-                } else if (boxNum == 0) {
-                    Log.d(TAG, "111111111111111111111111111");
-                    if (passwordRecord != 0) {
-                        mWaitingFlag = true;
-                        Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
-                        mEventHandler.sendMessage(msg1);
+            synchronized (this) {
+                if (msg.what == PASSWORD) {
+                    if (Debug) Log.d(TAG, "Handle Password");
+                    String password = (String) msg.obj;
+                    int tag = msg.arg1;
+                    //if input is not all number, we display error
+                    if (!isNumeric(password)) {
+                        Intent intent = new Intent(MainActivity.this, PasswordFailActivity.class);
+                        intent.putExtra("ErrorReason", "密码错误");
+                        startActivity(intent);
                         return;
                     }
 
-                    Intent intent = new Intent(MainActivity.this, PasswordFailActivity.class);
-                    intent.putExtra("ErrorReason", "密码错误");
-                    startActivity(intent);
-                }
-            } else if (msg.what == RFIDCARD) {
-                if(Debug) Log.d(TAG, "Handle Rfid card");
-                String rfidCode = (String) msg.obj;
-                int boxNum = checkRfidCode(rfidCode);
-                if(boxNum > 0) {
-                    Intent intent = new Intent(MainActivity.this, RfidcardOpenActivity.class);
-                    intent.putExtra("BoxNum", boxNum);
-                    startActivity(intent);
-                } else if(boxNum == 0) {
-                    Intent intent = new Intent(MainActivity.this, RfidcardFailActivity.class);
-                    intent.putExtra("ErrorReason", "无效卡");
-                    startActivity(intent);
-                }
-            }else if (msg.what == BARCODE) {
-                if(Debug) Log.d(TAG, "Handle BarCode");
-                String barCode = (String) msg.obj;
-                //TODO change to barcode
-                int boxNum = 01;//checkBarCode(barCode);
-                if(boxNum > 0) {
+                    int boxNum = checkPassword(Integer.parseInt(password));
+                    if (boxNum > 0) {
+                        Intent intent = new Intent(MainActivity.this, PasswordOpenActivity.class);
+                        intent.putExtra("BoxNum", boxNum);
+                        startActivity(intent);
+                    } else if (boxNum == 0) {
+                        if (tag == 0) {
+                            mWaitingFlag = PASSWORD;
+                            isDownload = true;
+                            Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
+                            mEventHandler.sendMessage(msg1);
+                            return;
+                        }
 
-                    Intent intent = new Intent(MainActivity.this, BarcodeOpenActivity.class);
-                    intent.putExtra("BoxNum", boxNum);
-                    startActivity(intent);
-                } else if(boxNum == 0) {
-                    Intent intent = new Intent(MainActivity.this, BarcodeFailActivity.class);
-                    intent.putExtra("ErrorReason", "无效条码");
-                    startActivity(intent);
-                }
-            } else if (msg.what == TRANSMIT) {
-                if(Debug) Log.d(TAG, "Handle Transmit");
-                synchronized(this) {
+                        Intent intent = new Intent(MainActivity.this, PasswordFailActivity.class);
+                        intent.putExtra("ErrorReason", "密码错误");
+                        startActivity(intent);
+                    }
+                } else if (msg.what == RFIDCARD) {
+                    if (Debug) Log.d(TAG, "Handle Rfid card");
+                    String rfidCode = (String) msg.obj;
+                    int tag = msg.arg1;
+                    int boxNum = checkRfidCode(rfidCode);
+                    if (boxNum > 0) {
+                        Intent intent = new Intent(MainActivity.this, RfidcardOpenActivity.class);
+                        intent.putExtra("BoxNum", boxNum);
+                        startActivity(intent);
+                    } else if (boxNum == 0) {
+                        if (tag == 0) {
+                            mWaitingFlag = RFIDCARD;
+                            isDownload = true;
+                            Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
+                            mEventHandler.sendMessage(msg1);
+                            return;
+                        }
+
+                        Intent intent = new Intent(MainActivity.this, RfidcardFailActivity.class);
+                        intent.putExtra("ErrorReason", "无效卡");
+                        startActivity(intent);
+                    }
+                } else if (msg.what == BARCODE) {
+                    if (Debug) Log.d(TAG, "Handle BarCode");
+                    String barCode = (String) msg.obj;
+                    int tag = msg.arg1;
+                    //TODO Implement this function if need
+                    //checkBarCode(barCode);
+                    int boxNum = 01;
+                    if (boxNum > 0) {
+
+                        Intent intent = new Intent(MainActivity.this, BarcodeOpenActivity.class);
+                        intent.putExtra("BoxNum", boxNum);
+                        startActivity(intent);
+                    } else if (boxNum == 0) {
+                        if (tag == 0) {
+                            mWaitingFlag = BARCODE;
+                            isDownload = true;
+                            Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
+                            mEventHandler.sendMessage(msg1);
+                            return;
+                        }
+                        Intent intent = new Intent(MainActivity.this, BarcodeFailActivity.class);
+                        intent.putExtra("ErrorReason", "无效条码");
+                        startActivity(intent);
+                    }
+                } else if (msg.what == TRANSMIT) {
+                    if (Debug) Log.d(TAG, "Handle Transmit");
+
                     dp = new DataPackage();
                     if (isDownload) {
                         generateDataPack(dp);
@@ -278,12 +338,12 @@ public class MainActivity extends Activity {
                             return;
                         }
                     }
-                    if(checkNetworkInfo())
+                    if (checkNetworkInfo())
                         getRemoteInfo(dp);
                     else
                         return;
 
-                    if(dp.getResponseData() == null)
+                    if (dp.getResponseData() == null)
                         return;
 
                     if (isDownload) {
@@ -299,8 +359,21 @@ public class MainActivity extends Activity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        if(mWaitingFlag) {
-                            Message msg1 = mEventHandler.obtainMessage(PASSWORD, passwordRecord);
+
+                        // recheck the information after we sync the data from the server
+                        if (mWaitingFlag == PASSWORD) {
+                            mWaitingFlag = 0;
+                            //arg1 == 1, will not try again when password is incorrect
+                            Message msg1 = mEventHandler.obtainMessage(PASSWORD, 1, 0, passwordRecord);
+                            mEventHandler.sendMessage(msg1);
+
+                        } else if (mWaitingFlag == RFIDCARD) {
+                            mWaitingFlag = 0;
+                            Message msg1 = mEventHandler.obtainMessage(RFIDCARD, 1, 0, rfidcardRecord);
+                            mEventHandler.sendMessage(msg1);
+                        } else if (mWaitingFlag == BARCODE) {
+                            mWaitingFlag = 0;
+                            Message msg1 = mEventHandler.obtainMessage(BARCODE, 1, 0, barcodeRecord);
                             mEventHandler.sendMessage(msg1);
                         }
 
@@ -318,11 +391,13 @@ public class MainActivity extends Activity {
                         //Upload success,remove the uploaded Upload in mUpload
                         try {
                             String ul = readFile("upload.xml");
+                            writeFile("upload.xml", "");
                             List<Upload> uploadedList = domService.getUpload(ul);
                             for (Upload uploaded : uploadedList) {
                                 for (Upload upload : mUpload)
                                     if (uploaded.getTradeNo().equals(upload.getTradeNo())) {
                                         mUpload.remove(upload);
+
                                     }
                             }
                             dumpUpload();
@@ -357,6 +432,7 @@ public class MainActivity extends Activity {
                 return boxNum;
             }
         }
+        rfidcardRecord = rfidcode;
         return 0;
     }
 
@@ -381,6 +457,7 @@ public class MainActivity extends Activity {
                 return boxNum;
             }
         }
+        passwordRecord = String.valueOf(password);
         return 0;
     }
 
@@ -421,7 +498,7 @@ public class MainActivity extends Activity {
         // 设置需调用WebService接口需要传入的两个参数mobileCode、userId
         if (false) {
             Log.d(TAG, "$serviceName$ = " + dp.getServiceName());
-            Log.d(TAG, "$requestContext$:"+ decodeBase64(dp.getRequestContext()));
+            Log.d(TAG, "$requestContext$:" + decodeBase64(dp.getRequestContext()));
             Log.d(TAG, "$requestData$:" + decodeBase64(dp.getRequestData()));
         }
         rpc.addProperty("serviceName", dp.getServiceName());
@@ -465,8 +542,8 @@ public class MainActivity extends Activity {
         int sr = Integer.parseInt(serviceResult);
         if (sr == 0 && !responseContext.equals("")) {
             dp.setResponseContext(responseContext);
-            if (Debug) Log.d(TAG, "ResponseContext = "+ decodeBase64(responseContext));
-        } else if (sr != 0 && !responseContext.equals("")){
+            if (Debug) Log.d(TAG, "ResponseContext = " + decodeBase64(responseContext));
+        } else if (sr != 0 && !responseContext.equals("")) {
             // Server return a error, we print the error
             String string = decodeBase64(responseContext);
             try {
@@ -506,7 +583,7 @@ public class MainActivity extends Activity {
         for (int i = 0; i < mData.size(); i++) {
             Data data = mData.get(i);
 
-            Log.d(TAG, "mData[" + i + "]:" );
+            Log.d(TAG, "mData[" + i + "]:");
             Log.d(TAG, "\tTradeNo\t" + data.getTradeNo());
             Log.d(TAG, "\tFLAG\t" + data.getFLAG());
         }
@@ -519,7 +596,7 @@ public class MainActivity extends Activity {
         for (int i = 0; i < mUpload.size(); i++) {
             Upload upload = mUpload.get(i);
 
-            Log.d(TAG, "mUpload[" + i + "]:" );
+            Log.d(TAG, "mUpload[" + i + "]:");
             Log.d(TAG, "\tTradeNo\t" + upload.getTradeNo());
         }
     }

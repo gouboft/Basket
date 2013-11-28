@@ -15,7 +15,7 @@ import android.widget.EditText;
 import com.jpjy.basket.MainActivity.EventHandler;
 
 public class PasswordActivity extends Activity {
-    private static final String TAG = "InputpasswordActivity";
+    private static final String TAG = "PasswordActivity";
     private static final int PASSWORD = 0x0001;
     private EditText pass;
     private Intent intent;
@@ -74,8 +74,8 @@ public class PasswordActivity extends Activity {
                 intent.putExtra("ErrorReason", "输入的密码小于6位");
                 startActivity(intent);
             } else if (password.length() == 6) {
-                Log.d(TAG, "Password is 6 digit");
-                Message msg = handler.obtainMessage(PASSWORD, Integer.parseInt(password));
+                Log.d(TAG, "Password is 6 digit" + password);
+                Message msg = handler.obtainMessage(PASSWORD, 0, 0, password);
                 handler.sendMessage(msg);
             }
 
