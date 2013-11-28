@@ -55,6 +55,9 @@ public class MainActivity extends Activity {
     private EventHandler mEventHandler;
     private List<Data> mData;
     private List<Upload> mUpload;
+    private boolean mWaitingFlag;
+    private int passwordRecord;
+    private String rfidcardRecord;
 
     private FileInputStream mRfidCard;
     private byte[] mBufferRfid;
@@ -223,17 +226,12 @@ public class MainActivity extends Activity {
                     startActivity(intent);
                 } else if (boxNum == 0) {
                     Log.d(TAG, "111111111111111111111111111");
-                    Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
-                    mEventHandler.sendMessage(msg1);
-                    //TODO: wait server return
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if (passwordRecord != 0) {
+                        mWaitingFlag = true;
+                        Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
+                        mEventHandler.sendMessage(msg1);
+                        return;
                     }
-
-                    msg1 = mEventHandler.obtainMessage(PASSWORD, password);
-                    mEventHandler.sendMessage(msg1);
 
                     Intent intent = new Intent(MainActivity.this, PasswordFailActivity.class);
                     intent.putExtra("ErrorReason", "密码错误");
@@ -301,6 +299,11 @@ public class MainActivity extends Activity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        if(mWaitingFlag) {
+                            Message msg1 = mEventHandler.obtainMessage(PASSWORD, passwordRecord);
+                            mEventHandler.sendMessage(msg1);
+                        }
+
                     } else {
                         String result = decodeBase64(dp.getResponseData());
                         try {
@@ -376,7 +379,7 @@ public class MainActivity extends Activity {
                     e.printStackTrace();
                 }
                 return boxNum;
-
+            }
         }
         return 0;
     }
