@@ -23,8 +23,10 @@
     <string name="input">请输入6位密码后</string>
     <string name="xx">********</string>
 
-    <string name="open1">第XX号抽屉已打开，请取出您的物品并关好柜门，谢谢！</string>
+    <string name="open1">号抽屉已打开，请取出</string>
     <string name="open2">密码开柜</string>
+    <string name="open3">第</string>
+    <string name="open4">您的物品并关好柜门，谢谢！</string>
 
     <string name="fail">（失败原因）</string>
     <string name="fail1">按“</string>

@@ -91,23 +91,53 @@
 
 
     <TextView
+        android:layout_width="25dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/line2"
+        android:text="@string/open3"
+        android:textColor="@color/black"
+        android:textSize="28sp"
+        android:id="@+id/in"/>
+
+    <TextView
+        android:layout_width="35dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@+id/in"
+        android:layout_below="@+id/line2"
+        android:text="@string/openout1"
+        android:textColor="@color/black"
+        android:textSize="28sp"
+        android:id="@+id/in1"/>
+
+    <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-
-        android:layout_marginLeft="120dp"
+        android:layout_toRightOf="@+id/in1"
         android:layout_marginTop="20dp"
-
         android:layout_below="@+id/line2"
         android:text="@string/open1"
         android:textColor="@color/black"
         android:textSize="28sp"
-        android:id="@+id/in"></TextView>
+        android:id="@+id/in2"/>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/in2"
+        android:text="@string/open4"
+        android:textColor="@color/black"
+        android:textSize="28sp"
+        android:id="@+id/in4"/>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="35dp"
         android:background="@drawable/bar3"
-        android:layout_alignParentBottom="true"></TextView>
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>
