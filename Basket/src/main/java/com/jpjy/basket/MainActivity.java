@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
 
         try {
             String ret = readFile("data.xml");
-            if (ret != null)
+            if (!ret.equals(""))
                 mData = domService.getDataResult(ret);
         } catch (Exception e) {
             e.printStackTrace();
