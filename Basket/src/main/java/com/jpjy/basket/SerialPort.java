@@ -84,6 +84,6 @@ public class SerialPort {
     public native void close();
 
     static {
-        System.loadLibrary("cardreader");
+        System.loadLibrary("serial_port");
     }
 }

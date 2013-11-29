@@ -9,16 +9,17 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-public class CardFailActivity extends Activity {
+public class RfidcardFailActivity extends Activity {
     private Intent intent;
     private boolean isInput = false;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.failreason);
+        setContentView(R.layout.rfidcardfail);
 
         Intent intent = getIntent();
         String er = intent.getStringExtra("ErrorReason");
@@ -30,9 +31,9 @@ public class CardFailActivity extends Activity {
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 if (!isInput) {
-                    Intent intent = new Intent(CardFailActivity.this, ChoiceActivity.class);
-                    CardFailActivity.this.startActivity(intent);
-                    CardFailActivity.this.finish();
+                    Intent intent = new Intent(RfidcardFailActivity.this, ChoiceActivity.class);
+                    RfidcardFailActivity.this.startActivity(intent);
+                    RfidcardFailActivity.this.finish();
                 }
             }
         }, 20000);
@@ -44,10 +45,10 @@ public class CardFailActivity extends Activity {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DEL:
                 isInput = true;
-                intent = new Intent(CardFailActivity.this,
+                intent = new Intent(RfidcardFailActivity.this,
                         ChoiceActivity.class);
                 startActivity(intent);
-                CardFailActivity.this.finish();
+                RfidcardFailActivity.this.finish();
                 break;
         }
         return true;
@@ -57,8 +58,8 @@ public class CardFailActivity extends Activity {
         if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER
                 && event.getAction() != KeyEvent.ACTION_UP) {
             isInput = true;
-            intent = new Intent(CardFailActivity.this,
-                    SwipeActivity.class);
+            intent = new Intent(RfidcardFailActivity.this,
+                    RfidcardActivity.class);
             startActivity(intent);
 
             return true;
