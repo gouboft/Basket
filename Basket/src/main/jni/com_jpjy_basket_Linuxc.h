@@ -22,6 +22,11 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_setUart
 JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendMsgUart
   (JNIEnv *, jobject, jstring);
 
+JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendHexUart
+  (JNIEnv *, jobject, jintArray);
+
+JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_send485HexUart
+  (JNIEnv *, jobject, jint);
 
 JNIEXPORT jstring JNICALL Java_com_jpjy_basket_Linuxc_receiveMsgUart
   (JNIEnv *, jobject);

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.jpjy.basket.MainActivity.EventHandler;
 
@@ -101,6 +102,8 @@ public class RfidcardActivity extends Activity {
                             return;
                         Log.d(TAG, "RFID card number is " + result);
                         isInput = true;
+                        mRfidCard.close();
+                        Toast.makeText(RfidcardActivity.this, "读到卡： " + result, Toast.LENGTH_LONG).show();
                         Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, result);
                         mEventHandler.sendMessage(msg);
                     }

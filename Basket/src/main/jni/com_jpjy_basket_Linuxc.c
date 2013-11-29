@@ -145,23 +145,107 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendMsgUart(JNIEnv *env,jobje
     buf=(*env)->GetStringUTFChars(env,str,NULL);
     len= (*env)->GetStringLength(env,str );
 
-    if(ttyS6andS7 == 7)
-    {
-        //--------------------写ttyS7前，设置uart485_gpio_state=1
-        write(ttyS7gpioFd, &dat1, sizeof(dat1));
-        LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;
-        write(fd,buf,len);
-        //--------------------写ttyS7后，设置uart485_gpio_state=0
-        write(ttyS7gpioFd, &dat0, sizeof(dat0));
-        LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;
-    }
-    else
-    {
-        write(fd,buf,len);
-    }
+    write(fd,buf,len);
 
     LOGI("jni write to %s data to devices !",buf) ;
     (*env)->ReleaseStringUTFChars(env, str, buf);
+}
+
+//联系发送一个数组的16进制数据
+JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendHexUart(JNIEnv *env,jobject mc,jintArray arr)
+{
+    int *buf;
+    int len;
+    LOGI("jni write to HEX data to devices !") ;
+    buf=(*env)->GetIntArrayElements(env,arr,NULL); 
+    len = (*env)->GetArrayLength(env,arr);
+    //--------------------写ttyS7前，设置uart485_gpio_state=1
+     write(ttyS7gpioFd, &dat1, sizeof(dat1));
+     LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;
+
+     LOGI("jni write 5 bytes to ttyS7 start !");
+     write(fd,buf,len);
+     LOGI("jni write 5 bytes to ttyS7 end !" );
+
+     //--------------------写ttyS7后，设置uart485_gpio_state=0
+     write(ttyS7gpioFd, &dat0, sizeof(dat0));
+     LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;
+
+
+    (*env)->ReleaseIntArrayElements(env, arr, buf,0);
+    LOGI("jni write to  data to devices !") ;
+}
+
+
+//加工后 485发送函数
+JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_send485HexUart(JNIEnv *env,jobject mc,jint number)
+{
+
+    LOGI("jni write to HEX data to devices !") ;
+    char hexStr[16];
+    char buf[]={0x8A,0x01,0x01,0x11,0x9B};
+    int n = number;    
+    char Hextable[]="0123456789ABCDEF";
+    char swaphex[16],hex[16];
+    int i=0, k,index;
+    //整型数转换成16进制数
+    while(n){
+        swaphex[i++]=Hextable[n%16];
+        n /= 16;
+    }
+    swaphex[i]=0;
+
+    for(k=0;k<i;k++)
+    {
+        hex[k]=swaphex[i-1-k];
+    }
+    hex[k]=0;
+    memset(hexStr,0,sizeof(hexStr));
+    strcpy(hexStr,hex);
+    sscanf(hexStr, "%x",&index); 
+    LOGI("jni :java write %d and jni change hex => %x!",number,index) ;
+    for(k =0; k<5; k++)
+    {
+        LOGI("jni write old 5 bytes  %x !",buf[k]) ;
+    }
+
+    buf[2]= index;
+    LOGI("jni write box lock addr(%x) to third bytes!",index) ;
+
+    //锁的地址除于8，如果商是什么就直接赋值给第2个字节，如果是0，则直接赋值0x01;
+    index=index / 8;
+    if(index == 0)
+    {
+        buf[1]= 0x01;
+        LOGI("jni write the board addr(%x) to second bytes !",buf[1]) ;
+    }
+    else
+    {
+        buf[1]= index;
+        LOGI("jni write the board addr(%x) to second bytes !",index) ;
+    }
+    //产生前4个字节的checksum,然后得到第5个字节的数据
+    int eof4x= buf[0]^buf[1]^buf[2]^buf[3];
+    LOGI("jni write fifth bytes (checksum = %x )!",eof4x) ;
+    buf[4]=eof4x;
+     for(k =0; k<5; k++)
+    {
+        LOGI("jni write new HEX => 5 bytes  %x !",buf[k]) ;
+    }
+
+     //--------------------写ttyS7前，设置uart485_gpio_state=1
+     write(ttyS7gpioFd, &dat1, sizeof(dat1));
+     LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;
+
+     LOGI("jni write 5 bytes to ttyS7 start !") ;
+     write(fd,buf,sizeof(buf));
+     LOGI("jni write 5 bytes to ttyS7 end !" );
+
+     //--------------------写ttyS7后，设置uart485_gpio_state=0
+     write(ttyS7gpioFd, &dat0, sizeof(dat0));
+     LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;
+     return 0;
+
 }
 
 

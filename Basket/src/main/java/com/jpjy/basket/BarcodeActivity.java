@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 import com.jpjy.basket.MainActivity.EventHandler;
 
 public class BarcodeActivity extends Activity {
@@ -67,8 +68,8 @@ public class BarcodeActivity extends Activity {
 
     protected void onPause() {
         super.onPause();
+        Toast.makeText(BarcodeActivity.this, "读到条码： " + mBarcode, Toast.LENGTH_LONG).show();
         // Stop the Read card thread
-        Linuxc.closeUart();
         if (mBarcodeThread != null) {
             mBarcodeThread.interrupt();
             mBarcodeThread = null;
@@ -97,8 +98,10 @@ public class BarcodeActivity extends Activity {
                 mBarcode = "";
                 mBarcode = Linuxc.receiveMsgUart();
                 Log.d(TAG, "Barcode = " + mBarcode);
-                if (mBarcode.length() > 4) {
+                if (mBarcode != null) {
                     isInput = true;
+                    Linuxc.closeUart();
+
                     Message msg = mEventHandler.obtainMessage(BARCODE, 0, 0, mBarcode);
                     mEventHandler.sendMessage(msg);
                 }
