@@ -26,7 +26,7 @@ public class RfidcardActivity extends Activity {
     private FileInputStream mRfidCard;
 
     private boolean isInput;
-
+    private String mCardNumber;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,9 +66,9 @@ public class RfidcardActivity extends Activity {
 
     protected void onPause() {
         super.onPause();
+        Toast.makeText(RfidcardActivity.this, "读到卡： " + mCardNumber, Toast.LENGTH_LONG).show();
         // Stop the Read card thread
         if (mRfidThread != null) {
-            mRfidThread.interrupt();
             mRfidThread = null;
         }
         finish();
@@ -97,14 +97,14 @@ public class RfidcardActivity extends Activity {
 
                     if (mRfidCard != null) {
                         int num = mRfidCard.read(BufferRfid);
-                            String result = Integer.toHexString(byte2int(BufferRfid)).toUpperCase();
+                            mCardNumber = Integer.toHexString(byte2int(BufferRfid)).toUpperCase();
                         if (num != 4)
                             return;
-                        Log.d(TAG, "RFID card number is " + result);
+                        Log.d(TAG, "RFID card number is " + mCardNumber);
                         isInput = true;
                         mRfidCard.close();
-                        Toast.makeText(RfidcardActivity.this, "读到卡： " + result, Toast.LENGTH_LONG).show();
-                        Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, result);
+                        mRfidThread.interrupt();
+                        Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, mCardNumber);
                         mEventHandler.sendMessage(msg);
                     }
                 } catch (IOException e) {

@@ -71,7 +71,6 @@ public class BarcodeActivity extends Activity {
         Toast.makeText(BarcodeActivity.this, "读到条码： " + mBarcode, Toast.LENGTH_LONG).show();
         // Stop the Read card thread
         if (mBarcodeThread != null) {
-            mBarcodeThread.interrupt();
             mBarcodeThread = null;
         }
         finish();
@@ -95,13 +94,12 @@ public class BarcodeActivity extends Activity {
         public void run() {
             super.run();
             while (!isInterrupted()) {
-                mBarcode = "";
                 mBarcode = Linuxc.receiveMsgUart();
-                Log.d(TAG, "Barcode = " + mBarcode);
                 if (mBarcode != null) {
                     isInput = true;
                     Linuxc.closeUart();
-
+                    Log.d(TAG, "Barcode = " + mBarcode);
+                    mBarcodeThread.interrupt();
                     Message msg = mEventHandler.obtainMessage(BARCODE, 0, 0, mBarcode);
                     mEventHandler.sendMessage(msg);
                 }
