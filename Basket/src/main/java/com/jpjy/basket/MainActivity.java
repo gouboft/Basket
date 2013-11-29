@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,9 +45,6 @@ public class MainActivity extends Activity {
     private static final int TRANSMIT = 0x0100;
     private static final int BARCODE = 0x1000;
 
-    private MyApplication myApp;
-    private DataPackage dp;
-
     private DomService domService;
     private boolean isDownload;
 
@@ -60,20 +59,13 @@ public class MainActivity extends Activity {
     private String rfidcardRecord;
     private String barcodeRecord;
 
-    private FileInputStream mRfidCard;
-    private byte[] mBufferRfid;
-    private SerialPort mBarcode;
-    private SerialPort mElecLock;
-    private InputStream mBarcodeStream;
-    private byte[] mBufferBarcode;
-
-    private boolean isNetworkConnect;
-
+    private OutputStream mElecLockIS;
+    private SerialPort mElecLockSerialPort;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        myApp = (MyApplication) getApplication();
+        MyApplication myApp = (MyApplication) getApplication();
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -85,6 +77,12 @@ public class MainActivity extends Activity {
         ht.start();
         mEventHandler = new EventHandler(ht.getLooper());
         myApp.setHandler(mEventHandler);
+        try {
+            mElecLockSerialPort = myApp.getBarcodeSerialPort();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mElecLockIS = mElecLockSerialPort.getOutputStream();
 
         domService = new DomService();
         mUpload = new ArrayList<Upload>();
@@ -98,7 +96,9 @@ public class MainActivity extends Activity {
         mUploadThread.start();
 
         try {
-            mData = domService.getDataResult(readFile("data.xml"));
+            String ret = readFile("data.xml");
+            if (ret != null)
+                mData = domService.getDataResult(ret);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -127,10 +127,12 @@ public class MainActivity extends Activity {
         ConnectivityManager cm;
         cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        State mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
-        if (mobile == null)
+        NetworkInfo ni = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        if (ni != null) {
+            State state = ni.getState();
+            return state == State.CONNECTED;
+        } else
             return false;
-        return mobile == State.CONNECTED;
     }
 
     public void writeFile(String fileName, String writeStr) throws IOException {
@@ -140,7 +142,6 @@ public class MainActivity extends Activity {
             fout.write(bytes);
             fout.close();
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -151,11 +152,11 @@ public class MainActivity extends Activity {
 
             int length = fin.available();
             byte[] buffer = new byte[length];
-            fin.read(buffer);
-            res = EncodingUtils.getString(buffer, "UTF-8");
-            fin.close();
+            if (fin.read(buffer) > 0) {
+                res = EncodingUtils.getString(buffer, "UTF-8");
+                fin.close();
+            }
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return res;
     }
@@ -305,9 +306,8 @@ public class MainActivity extends Activity {
                     if (Debug) Log.d(TAG, "Handle BarCode");
                     String barCode = (String) msg.obj;
                     int tag = msg.arg1;
-                    //TODO Implement this function if need
-                    //checkBarCode(barCode);
-                    int boxNum = 01;
+
+                    int boxNum = checkBarCode(barCode);
                     if (boxNum > 0) {
 
                         Intent intent = new Intent(MainActivity.this, BarcodeOpenActivity.class);
@@ -328,7 +328,7 @@ public class MainActivity extends Activity {
                 } else if (msg.what == TRANSMIT) {
                     if (Debug) Log.d(TAG, "Handle Transmit");
 
-                    dp = new DataPackage();
+                    DataPackage dp = new DataPackage();
                     if (isDownload) {
                         generateDataPack(dp);
                     } else {
@@ -477,6 +477,14 @@ public class MainActivity extends Activity {
         return 0;
     }
 
+    private int checkBarCode(String barcode) {
+        if(barcode.length() > 5) {
+            openDoor(2);
+            return 1;
+        }
+        return 0;
+    }
+
     private Upload generateUpload(int openType, Data data) {
         Upload upload = new Upload();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -493,8 +501,27 @@ public class MainActivity extends Activity {
     }
 
     private void openDoor(int doorNo) {
-        //Todo: 实现这个函数
+        int[] result =  keyOfLock(doorNo);
+        byte[] buffer = new byte[result.length];
+        for (int i = 0; i < result.length; i++)
+            buffer[i] = (byte) result[i];
+        try {
+            mElecLockIS.write(buffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Log.d(TAG, "The number of the door  " + doorNo + " is open!");
+
+    }
+
+    private int[] keyOfLock(int doorNo) {
+        int[] key = {0x8A, 0x01, doorNo, 0x11, 0x9B};
+        if (key[2]/8 != 0)
+            key[1] = key[2] / 8;
+
+        key[4] = key[0] ^ key[1] ^ key[2] ^ key[3];
+        return key;
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -512,7 +539,7 @@ public class MainActivity extends Activity {
         SoapObject rpc = new SoapObject(nameSpace, methodName);
 
         // 设置需调用WebService接口需要传入的两个参数mobileCode、userId
-        if (false) {
+        if (Debug) {
             Log.d(TAG, "$serviceName$ = " + dp.getServiceName());
             Log.d(TAG, "$requestContext$:" + decodeBase64(dp.getRequestContext()));
             Log.d(TAG, "$requestData$:" + decodeBase64(dp.getRequestData()));
@@ -593,7 +620,7 @@ public class MainActivity extends Activity {
 
 
     private void dumpData() {
-        if (mData.equals(""))
+        if (mData.size() > 0)
             return;
         Log.d(TAG, "The number mData have ------- " + mData.size() + " ------- Data");
         for (int i = 0; i < mData.size(); i++) {
@@ -606,7 +633,7 @@ public class MainActivity extends Activity {
     }
 
     private void dumpUpload() {
-        if (mUpload.equals(""))
+        if (mUpload.size() > 0)
             return;
         Log.d(TAG, "The number of mUpload have ------- " + mUpload.size() + " ------- Upload");
         for (int i = 0; i < mUpload.size(); i++) {

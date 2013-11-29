@@ -35,8 +35,8 @@ public class MyApplication extends Application {
 
     public SerialPort getBarcodeSerialPort() throws SecurityException, IOException, InvalidParameterException {
         if (mRfidSerialPort == null) {
-            String path = "/dev/ttyS5";
-            int baudrate = 57600;
+            String path = "/dev/ttyS6";
+            int baudrate = 9600;
 
             /* Check parameters */
             if ((path.length() == 0) || (baudrate == -1)) {
@@ -58,8 +58,8 @@ public class MyApplication extends Application {
 
     public SerialPort getElecLockSerialPort() throws SecurityException, IOException, InvalidParameterException {
         if (mElecLockSerialPort == null) {
-            String path = "/dev/ttyS5";;
-            int baudrate = 57600;
+            String path = "/dev/ttyS7";;
+            int baudrate = 9600;
 
             /* Check parameters */
             if ((path.length() == 0) || (baudrate == -1)) {
