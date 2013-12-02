@@ -35,7 +35,7 @@ public class PasswordFailActivity extends Activity {
                     PasswordFailActivity.this.finish();
                 }
             }
-        }, 5000);
+        }, 2000);
 
     }
 

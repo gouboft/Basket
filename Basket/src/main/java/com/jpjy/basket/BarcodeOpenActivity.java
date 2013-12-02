@@ -29,7 +29,7 @@ public class BarcodeOpenActivity extends Activity {
                 BarcodeOpenActivity.this.startActivity(intent);
                 BarcodeOpenActivity.this.finish();
             }
-        }, 20000);
+        }, 5000);
     }
 
 }

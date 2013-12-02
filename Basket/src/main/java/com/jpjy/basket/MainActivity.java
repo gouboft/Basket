@@ -25,7 +25,9 @@ import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -85,7 +87,9 @@ public class MainActivity extends Activity {
         mUploadThread.start();
 
         try {
-            mData = domService.getDataResult(readFile("data.xml"));
+            String ret = readFile("data.xml");
+            if (!ret.equals(""))
+                mData = domService.getDataResult(ret);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -128,8 +132,7 @@ public class MainActivity extends Activity {
             byte[] bytes = writeStr.getBytes();
             fout.write(bytes);
             fout.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
     }
 
@@ -144,8 +147,7 @@ public class MainActivity extends Activity {
                 res = EncodingUtils.getString(buffer, "UTF-8");
                 fin.close();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
         return res;
     }
@@ -190,7 +192,7 @@ public class MainActivity extends Activity {
                 mEventHandler.sendMessage(msg);
 
                 try {
-                    Thread.sleep(60000);
+                    Thread.sleep(600000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -211,7 +213,7 @@ public class MainActivity extends Activity {
                 mEventHandler.sendMessage(msg);
 
                 try {
-                    Thread.sleep(60000);
+                    Thread.sleep(600000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -467,10 +469,25 @@ public class MainActivity extends Activity {
     }
 
     private int checkBarCode(String barcode) {
-        if(barcode.length() > 5) {
-            openDoor(2);
-            return 1;
+        int boxNum;
+        for (Data data : mData) {
+            if (barcode.equals(data.getTradeNo())) {
+                boxNum = data.getBoxNo();
+
+                openDoor(boxNum);
+
+                // Record the passwordopen box data to filesystem
+                mUpload.add(generateUpload(2, data));
+
+                try {
+                    writeFile("upload.xml", domService.putUpload(mUpload));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return boxNum;
+            }
         }
+
         return 0;
     }
 
@@ -497,17 +514,41 @@ public class MainActivity extends Activity {
             Log.e(TAG, "Hardware error");
             return;
         }
+        Linuxc.setUart(9600);
 
+
+        String GPIO = "/sys/class/power_supply/battery/device/uart485_gpio_state";
+        writeSDFile(GPIO, "1");
+        //Linuxc.send485HexUart(3);
         Linuxc.sendHexUart(keyOfLock(doorNo));
-        Linuxc.closeUart();
 
+        Linuxc.closeUart();
+        writeSDFile(GPIO, "0");
         Log.d(TAG, "The number of the door  " + doorNo + " is open!");
+    }
+
+
+    public void writeSDFile(String fileName, String write_str) {
+
+        File file = new File(fileName);
+
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(file);
+            byte [] bytes = write_str.getBytes();
+            fos.write(bytes);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private int[] keyOfLock(int doorNo) {
         int[] key = {0x8A, 0x01, doorNo, 0x11, 0x9B};
         if (key[2]/8 != 0)
-            key[1] = key[2] / 8;
+            key[1] = key[2] / 8 + 1;
 
         key[4] = key[0] ^ key[1] ^ key[2] ^ key[3];
         return key;

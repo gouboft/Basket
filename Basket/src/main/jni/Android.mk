@@ -21,6 +21,5 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := uart
 LOCAL_SRC_FILES := com_jpjy_basket_Linuxc.c
 LOCAL_LDLIBS    := -llog
-LOCAL_SHARED_LIBRARIES := liblog
 
 include $(BUILD_SHARED_LIBRARY)

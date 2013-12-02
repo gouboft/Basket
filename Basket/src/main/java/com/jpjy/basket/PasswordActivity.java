@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -19,7 +20,6 @@ public class PasswordActivity extends Activity {
     private static final int PASSWORD = 0x0001;
     private EditText pass;
     private Intent intent;
-    private MyApplication myApplication;
 
     private EventHandler handler;
     private boolean isInput = false;
@@ -31,7 +31,7 @@ public class PasswordActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.password);
 
-        myApplication = (MyApplication) getApplication();
+        MyApplication myApplication = (MyApplication) getApplication();
         handler = myApplication.getHandler();
 
         pass = (EditText) findViewById(R.id.password);
@@ -46,7 +46,7 @@ public class PasswordActivity extends Activity {
                     PasswordActivity.this.finish();
                 }
             }
-        }, 30000);
+        }, 20000);
 
     }
 
@@ -67,8 +67,13 @@ public class PasswordActivity extends Activity {
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER
                 && event.getAction() != KeyEvent.ACTION_UP) {
-            String password = pass.getText().toString();
+            Editable editable = pass.getText();
+            String password = "";
+            if (editable != null)
+                password = editable.toString();
+
             isInput = true;
+
             if (password.length() < 6) {
                 intent = new Intent(PasswordActivity.this, PasswordFailActivity.class);
                 intent.putExtra("ErrorReason", "输入的密码小于6位");

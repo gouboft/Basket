@@ -30,7 +30,7 @@ public class RfidcardOpenActivity extends Activity {
                 RfidcardOpenActivity.this.startActivity(intent);
                 RfidcardOpenActivity.this.finish();
             }
-        }, 20000);
+        }, 5000);
     }
 
 }

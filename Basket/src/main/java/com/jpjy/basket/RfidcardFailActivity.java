@@ -36,7 +36,7 @@ public class RfidcardFailActivity extends Activity {
                     RfidcardFailActivity.this.finish();
                 }
             }
-        }, 20000);
+        }, 2000);
 
     }
 

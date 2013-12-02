@@ -16,7 +16,7 @@
 
 #include <sys/time.h> 
 
-#include <android/log.h>
+#include "android/log.h"
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "", __VA_ARGS__))
 
 #undef  TCSAFLUSH
@@ -151,26 +151,35 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendMsgUart(JNIEnv *env,jobje
     (*env)->ReleaseStringUTFChars(env, str, buf);
 }
 
-//联系发送一个数组的16进制数据
+//连续发送一个数组的16进制数据
 JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendHexUart(JNIEnv *env,jobject mc,jintArray arr)
 {
+/*    write(ttyS7gpioFd, &dat1, sizeof(dat1));
+    LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;*/
     int *buf;
-    int len;
+    char sendbuf[]={0x8A,0x01,0x01,0x11,0x9B};
+    int len,h;
     LOGI("jni write to HEX data to devices !") ;
     buf=(*env)->GetIntArrayElements(env,arr,NULL); 
     len = (*env)->GetArrayLength(env,arr);
+    for(h =0; h<5; h++)
+    {
+        sendbuf[h]= (char) buf[h];
+        LOGI("java write HEX => 5 bytes 111 %x , %d!",buf[h], sizeof sendbuf) ;
+    }
+ 
     //--------------------写ttyS7前，设置uart485_gpio_state=1
-     write(ttyS7gpioFd, &dat1, sizeof(dat1));
-     LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;
+/*    write(ttyS7gpioFd, &dat1, sizeof(dat1));
+    LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;*/
 
-     LOGI("jni write 5 bytes to ttyS7 start !");
-     write(fd,buf,len);
-     LOGI("jni write 5 bytes to ttyS7 end !" );
 
-     //--------------------写ttyS7后，设置uart485_gpio_state=0
-     write(ttyS7gpioFd, &dat0, sizeof(dat0));
-     LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;
+    LOGI("jni write 5 bytes to ttyS7 start !");
+    write(fd,sendbuf,sizeof(sendbuf));
+    LOGI("jni write 5 bytes to ttyS7 end !" );
 
+   //--------------------写ttyS7后，设置uart485_gpio_state=0
+/*    write(ttyS7gpioFd, &dat0, sizeof(dat0));
+    LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;*/
 
     (*env)->ReleaseIntArrayElements(env, arr, buf,0);
     LOGI("jni write to  data to devices !") ;
@@ -221,7 +230,7 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_send485HexUart(JNIEnv *env,jo
     }
     else
     {
-        buf[1]= index;
+        buf[1]= index + 1;
         LOGI("jni write the board addr(%x) to second bytes !",index) ;
     }
     //产生前4个字节的checksum,然后得到第5个字节的数据
@@ -244,7 +253,7 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_send485HexUart(JNIEnv *env,jo
      //--------------------写ttyS7后，设置uart485_gpio_state=0
      write(ttyS7gpioFd, &dat0, sizeof(dat0));
      LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;
-     return 0;
+
 
 }
 

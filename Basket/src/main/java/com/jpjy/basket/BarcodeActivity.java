@@ -16,13 +16,9 @@ public class BarcodeActivity extends Activity {
     private static final String TAG = "BarcodeActivity";
     private static final int BARCODE = 0x1000;
 
-    private Intent intent;
-
     private BarcodeThread mBarcodeThread;
-    private MyApplication myApplication;
     private EventHandler mEventHandler;
 
-    private int fd;
     private String mBarcode;
     private boolean isInput;
 
@@ -37,13 +33,13 @@ public class BarcodeActivity extends Activity {
             mBarcodeThread = new BarcodeThread();
         mBarcodeThread.start();
 
-        fd = Linuxc.openUart("/dev/ttyS6");
+        int fd = Linuxc.openUart("/dev/ttyS6");
         if(fd > 0) {
             Linuxc.setUart(9600);
             Log.d(TAG, "ttyS6 is open");
         }
 
-        myApplication = (MyApplication) getApplication();
+        MyApplication myApplication = (MyApplication) getApplication();
         mEventHandler = myApplication.getHandler();
 
         new Handler().postDelayed(new Runnable() {
@@ -54,7 +50,7 @@ public class BarcodeActivity extends Activity {
                     BarcodeActivity.this.finish();
                 }
             }
-        }, 30000);
+        }, 20000);
     }
 
     protected void onResume() {
@@ -80,7 +76,7 @@ public class BarcodeActivity extends Activity {
         isInput = true;
         switch (keyCode) {
             case KeyEvent.KEYCODE_DEL:
-                intent = new Intent(BarcodeActivity.this,
+                Intent intent = new Intent(BarcodeActivity.this,
                         ChoiceActivity.class);
                 startActivity(intent);
                 BarcodeActivity.this.finish();

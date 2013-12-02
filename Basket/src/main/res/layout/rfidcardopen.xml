@@ -108,6 +108,7 @@
         android:layout_toRightOf="@+id/in"
         android:layout_below="@+id/line2"
         android:text="@string/openout1"
+        android:gravity="center"
         android:textColor="@color/black"
         android:textSize="28sp"
         android:id="@+id/in1"/>

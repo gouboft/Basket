@@ -31,7 +31,7 @@ public class DomService {
     }
 
     public List<Data> getDataResult(String responsedata) throws Exception {
-        List<Data> list = null;
+        List<Data> list;
 
         InputStream inputStream = new ByteArrayInputStream(responsedata.getBytes());
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -95,8 +95,7 @@ public class DomService {
 
         Element Upload = document.createElement("DataUploadRequest");
         document.appendChild(Upload);
-        for (int i = 0; i < list.size(); i++) {
-            Upload upload = list.get(i);
+        for (Upload ignored : list) {
             Upload.appendChild(document.createElement("Upload"));
         }
 
@@ -192,7 +191,7 @@ public class DomService {
 
             Element requestContext = document.createElement("DataDownloadRequest");
             document.appendChild(requestContext);
-            //Todo: check that Wheather the TerminalNo is the same with ContainerNo
+
             requestContext.setAttribute("ContainerNo", getTerminalNo());
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -207,15 +206,13 @@ public class DomService {
             return android.util.Base64.encodeToString(ret, Base64.DEFAULT);
         } else {
             if (Debug) Log.d(TAG, "RequestData = " + upload);
-            byte[] result = upload.toString().getBytes("UTF-8");
+            byte[] result = upload.getBytes("UTF-8");
             return android.util.Base64.encodeToString(result, Base64.DEFAULT);
         }
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
     public String getResponseContext(String responseContext) throws Exception {
-        List<String> list = null;
-
         InputStream inputStream = new ByteArrayInputStream(responseContext.getBytes());
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -228,16 +225,14 @@ public class DomService {
         if (nodeList == null || nodeList.getLength() == 0) {
             return null;
         }
-        // 初始化
-        list = new ArrayList<String>();
-        Element element = (Element) nodeList.item(0);
-        String responseMesage = element.getTextContent();
 
-        return responseMesage;
+        Element element = (Element) nodeList.item(0);
+
+        return element.getTextContent();
     }
 
     public List<Upload> getUpload(String uploaded) throws Exception {
-        List<Upload> list = null;
+        List<Upload> list;
 
         InputStream inputStream = new ByteArrayInputStream(uploaded.getBytes());
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

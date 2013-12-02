@@ -29,7 +29,7 @@ public class PasswordOpenActivity extends Activity {
                 PasswordOpenActivity.this.startActivity(intent);
                 PasswordOpenActivity.this.finish();
             }
-        }, 20000);
+        }, 5000);
     }
 
 }

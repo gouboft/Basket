@@ -35,7 +35,7 @@ public class BarcodeFailActivity extends Activity {
                     BarcodeFailActivity.this.finish();
                 }
             }
-        }, 20000);
+        }, 2000);
 
     }
 

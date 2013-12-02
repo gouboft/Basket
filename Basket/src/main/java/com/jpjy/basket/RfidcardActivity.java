@@ -46,7 +46,7 @@ public class RfidcardActivity extends Activity {
                     RfidcardActivity.this.finish();
                 }
             }
-        }, 30000);
+        }, 20000);
     }
 
     protected void onResume() {
@@ -115,8 +115,7 @@ public class RfidcardActivity extends Activity {
     }
 
     private static int byte2int(byte[] res) {
-        int targets = (res[3] & 0xff) | ((res[2] << 8) & 0xff00)
+        return (res[3] & 0xff) | ((res[2] << 8) & 0xff00)
                 | ((res[1] << 24) >>> 8) | (res[0] << 24);
-        return targets;
     }
 }
