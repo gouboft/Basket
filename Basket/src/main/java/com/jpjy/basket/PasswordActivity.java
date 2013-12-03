@@ -43,11 +43,15 @@ public class PasswordActivity extends Activity {
                 if (!isInput) {
                     Intent intent = new Intent(PasswordActivity.this, ChoiceActivity.class);
                     PasswordActivity.this.startActivity(intent);
-                    PasswordActivity.this.finish();
                 }
             }
         }, 20000);
 
+    }
+
+    public void onPause() {
+        super.onPause();
+        finish();
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {

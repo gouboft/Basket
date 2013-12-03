@@ -10,7 +10,7 @@ import android.view.WindowManager;
 
 public class ChoiceActivity extends Activity {
 
-    Intent intent;
+    private Intent intent;
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +19,11 @@ public class ChoiceActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+    }
+
+    public void onPause() {
+        super.onPause();
+        finish();
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {

@@ -165,21 +165,23 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendHexUart(JNIEnv *env,jobje
     for(h =0; h<5; h++)
     {
         sendbuf[h]= (char) buf[h];
-        LOGI("java write HEX => 5 bytes 111 %x , %d!",buf[h], sizeof sendbuf) ;
+        LOGI("java write send HEX => 5 bytes  %x !",buf[h]) ;
     }
- 
     //--------------------写ttyS7前，设置uart485_gpio_state=1
-/*    write(ttyS7gpioFd, &dat1, sizeof(dat1));
-    LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;*/
-
-
+    write(ttyS7gpioFd, &dat1, sizeof(dat1));
+    LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;
+    sleep(1);
     LOGI("jni write 5 bytes to ttyS7 start !");
     write(fd,sendbuf,sizeof(sendbuf));
     LOGI("jni write 5 bytes to ttyS7 end !" );
+    for(h =0; h<5; h++)
+    {
+        LOGI("java write new HEX => 5 bytes  %x !",sendbuf[h]) ;
+    }
 
-   //--------------------写ttyS7后，设置uart485_gpio_state=0
-/*    write(ttyS7gpioFd, &dat0, sizeof(dat0));
-    LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;*/
+    //--------------------写ttyS7后，设置uart485_gpio_state=0
+    LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;
+    write(ttyS7gpioFd, &dat0, sizeof(dat0));
 
     (*env)->ReleaseIntArrayElements(env, arr, buf,0);
     LOGI("jni write to  data to devices !") ;
@@ -237,22 +239,21 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_send485HexUart(JNIEnv *env,jo
     int eof4x= buf[0]^buf[1]^buf[2]^buf[3];
     LOGI("jni write fifth bytes (checksum = %x )!",eof4x) ;
     buf[4]=eof4x;
-     for(k =0; k<5; k++)
+    //--------------------写ttyS7前，设置uart485_gpio_state=1
+    write(ttyS7gpioFd, &dat1, sizeof(dat1));
+    LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;
+    sleep(1);
+    LOGI("jni write 5 bytes to ttyS7 start !") ;
+    write(fd,buf,sizeof(buf));
+    LOGI("jni write 5 bytes to ttyS7 end !" );
+    for(k =0; k<5; k++)
     {
         LOGI("jni write new HEX => 5 bytes  %x !",buf[k]) ;
     }
 
-     //--------------------写ttyS7前，设置uart485_gpio_state=1
-     write(ttyS7gpioFd, &dat1, sizeof(dat1));
-     LOGI("jni write to %c data to uart485_gpio_state !",dat1) ;
-
-     LOGI("jni write 5 bytes to ttyS7 start !") ;
-     write(fd,buf,sizeof(buf));
-     LOGI("jni write 5 bytes to ttyS7 end !" );
-
      //--------------------写ttyS7后，设置uart485_gpio_state=0
-     write(ttyS7gpioFd, &dat0, sizeof(dat0));
      LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;
+    write(ttyS7gpioFd, &dat0, sizeof(dat0));
 
 
 }
@@ -262,7 +263,7 @@ JNIEXPORT jstring JNICALL Java_com_jpjy_basket_Linuxc_receiveMsgUart(JNIEnv *env
 {
     int len=0,ret;
     char buffer[128]="";
-    char card[6];
+    char card[33];
     fd_set rdfd; 
     memset(buffer,0,sizeof(buffer));
 
@@ -321,7 +322,11 @@ JNIEXPORT jstring JNICALL Java_com_jpjy_basket_Linuxc_receiveMsgUart(JNIEnv *env
                 len=read(fd, buffer, sizeof(buffer));
                 if (len > 0)
                 {
-                    sprintf(card,"%2.2X%2.2X%2.2X%2.2X",buffer[0],buffer[1],buffer[2],buffer[3]);
+                    int i, sum = 0, ret = 0;
+                    for (i = 0; i < len; i++) {
+                        ret = sprintf(&card[sum], "%d", buffer[i]);
+                        sum += ret;
+                    }
                     LOGI("jni read data from rc522_dev !") ;
                     return (*env)->NewStringUTF(env,card);
                 }

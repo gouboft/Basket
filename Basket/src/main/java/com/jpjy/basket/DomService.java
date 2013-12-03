@@ -24,7 +24,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 public class DomService {
-    private static final boolean Debug = false;
+    private static final boolean Debug = Config.Debug;
     private static final String TAG = "DomService";
 
     public DomService() {
@@ -134,9 +134,9 @@ public class DomService {
         String LicenceNo;
         String name[] = {"TerminalNo", "TerminalType", "LicenceNo"};
 
-        TerminalNo = getTerminalNo();
+        TerminalNo = Config.getTerminalNo();
         TerminalType = "2";
-        LicenceNo = getLicenceNo();
+        LicenceNo = Config.getLicenceNo();
         String value[] = {TerminalNo, TerminalType, LicenceNo};
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -192,7 +192,7 @@ public class DomService {
             Element requestContext = document.createElement("DataDownloadRequest");
             document.appendChild(requestContext);
 
-            requestContext.setAttribute("ContainerNo", getTerminalNo());
+            requestContext.setAttribute("ContainerNo", Config.getTerminalNo());
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
@@ -261,13 +261,5 @@ public class DomService {
         }
         return list;
     }
-    private String getTerminalNo() {
-        //Todo: get this from the property
-        return "1029384756";
-    }
 
-    private String getLicenceNo() {
-        //Todo: get this String from the filesystem
-        return "ABCDEF-GHIJK-LMNOP-QRSTU";
-    }
 }

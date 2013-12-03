@@ -3,8 +3,10 @@ package com.jpjy.basket;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
@@ -25,9 +27,7 @@ import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -37,19 +37,27 @@ import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends Activity {
-    private static final boolean Debug = true;
+    private static final boolean Debug = Config.Debug;
     private static final String TAG = "MainActivity";
 
     private static final int PASSWORD = 0x0001;
     private static final int RFIDCARD = 0x0010;
-    private static final int TRANSMIT = 0x0100;
+    private static final int DOWNLOAD = 0x0100;
+    private static final int UPLOAD = 0x0101;
     private static final int BARCODE = 0x1000;
 
+    private final int NETWORK_TYPE = ConnectivityManager.TYPE_WIFI;
+
     private DomService domService;
-    private boolean isDownload;
+
+    private Context mContext;
 
     private Thread mDownloadThread;
     private Thread mUploadThread;
+    private boolean waitNetworkToDownload;
+    private boolean waitNetworkToUpload;
+    private ConnectivityManager mConnectivityManager;
+    private NetworkStatusReceiver mReceiver;
 
     private EventHandler mEventHandler;
     private List<Data> mData;
@@ -62,6 +70,7 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
         MyApplication myApp = (MyApplication) getApplication();
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -78,7 +87,11 @@ public class MainActivity extends Activity {
         domService = new DomService();
         mUpload = new ArrayList<Upload>();
         mData = new ArrayList<Data>();
-        isDownload = true;
+
+        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mReceiver = new NetworkStatusReceiver();
+        IntentFilter mIntentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mContext.registerReceiver(mReceiver, mIntentFilter);
 
         mDownloadThread = new DownloadThread();
         mDownloadThread.start();
@@ -107,18 +120,17 @@ public class MainActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         if (Debug) Log.d(TAG, "onDestroy()");
+        mContext.unregisterReceiver(mReceiver);
         mDownloadThread.interrupt();
         mDownloadThread = null;
         mUploadThread.interrupt();
         mUploadThread = null;
         finish();
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     private boolean checkNetworkInfo() {
-        ConnectivityManager cm;
-        cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo ni = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        NetworkInfo ni = mConnectivityManager.getNetworkInfo(NETWORK_TYPE);
         if (ni != null) {
             State state = ni.getState();
             return state == State.CONNECTED;
@@ -179,20 +191,50 @@ public class MainActivity extends Activity {
         }
     }
 
+    private class NetworkStatusReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action == null)
+                return;
+            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                NetworkInfo info = mConnectivityManager.getNetworkInfo(
+                        NETWORK_TYPE);
+                if (info == null)
+                    return;
+                if (Debug) Log.d(TAG, "NetWork Type is " +  info.getType() +
+                        " and it's state is " + info.getState());
+
+                if (info.getType() == NETWORK_TYPE &&
+                        info.getState() == State.CONNECTED) {
+                    if (waitNetworkToDownload) {
+                        Message msg = mEventHandler.obtainMessage(DOWNLOAD);
+                        mEventHandler.sendMessage(msg);
+
+                    } else if (waitNetworkToUpload) {
+                        Message msg = mEventHandler.obtainMessage(UPLOAD);
+                        mEventHandler.sendMessage(msg);
+                    }
+                }
+            }
+        }
+    }
+
     private class DownloadThread extends Thread {
         @Override
         public void run() {
             super.run();
             while (!isInterrupted()) {
                 if (Debug) Log.d(TAG, "DownloadThread running");
-                //download
-                isDownload = true;
-
-                Message msg = mEventHandler.obtainMessage(TRANSMIT);
-                mEventHandler.sendMessage(msg);
+                if (checkNetworkInfo()) {
+                    Message msg = mEventHandler.obtainMessage(DOWNLOAD);
+                    mEventHandler.sendMessage(msg);
+                } else {
+                    waitNetworkToDownload = true;
+                }
 
                 try {
-                    Thread.sleep(600000);
+                    Thread.sleep(Config.DownloadInterval);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -206,14 +248,15 @@ public class MainActivity extends Activity {
             super.run();
             while (!isInterrupted()) {
                 if (Debug) Log.d(TAG, "UploadThread running");
-                //upload
-                isDownload = false;
-
-                Message msg = mEventHandler.obtainMessage(TRANSMIT);
-                mEventHandler.sendMessage(msg);
+                if (checkNetworkInfo()) {
+                    Message msg = mEventHandler.obtainMessage(UPLOAD);
+                    mEventHandler.sendMessage(msg);
+                } else {
+                    waitNetworkToUpload = true;
+                }
 
                 try {
-                    Thread.sleep(600000);
+                    Thread.sleep(Config.UploadInterval);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -261,8 +304,7 @@ public class MainActivity extends Activity {
                     } else if (boxNum == 0) {
                         if (tag == 0) {
                             mWaitingFlag = PASSWORD;
-                            isDownload = true;
-                            Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
+                            Message msg1 = mEventHandler.obtainMessage(DOWNLOAD);
                             mEventHandler.sendMessage(msg1);
                             return;
                         }
@@ -283,8 +325,7 @@ public class MainActivity extends Activity {
                     } else if (boxNum == 0) {
                         if (flag == 0) {
                             mWaitingFlag = RFIDCARD;
-                            isDownload = true;
-                            Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
+                            Message msg1 = mEventHandler.obtainMessage(DOWNLOAD);
                             mEventHandler.sendMessage(msg1);
                             return;
                         }
@@ -307,8 +348,7 @@ public class MainActivity extends Activity {
                     } else if (boxNum == 0) {
                         if (tag == 0) {
                             mWaitingFlag = BARCODE;
-                            isDownload = true;
-                            Message msg1 = mEventHandler.obtainMessage(TRANSMIT);
+                            Message msg1 = mEventHandler.obtainMessage(DOWNLOAD);
                             mEventHandler.sendMessage(msg1);
                             return;
                         }
@@ -316,18 +356,14 @@ public class MainActivity extends Activity {
                         intent.putExtra("ErrorReason", "无效条码");
                         startActivity(intent);
                     }
-                } else if (msg.what == TRANSMIT) {
-                    if (Debug) Log.d(TAG, "Handle Transmit");
+                } else if (msg.what == DOWNLOAD) {
+                    if (Debug) Log.d(TAG, "Handle Download");
 
                     DataPackage dp = new DataPackage();
-                    if (isDownload) {
-                        generateDataPack(dp);
-                    } else {
-                        generateUploadPack(dp);
 
-                        if (dp.getRequestData().equals("")) {
-                            return;
-                        }
+                    generateDataPack(dp);
+                    if (dp.getRequestData().equals("")) {
+                        return;
                     }
                     if (checkNetworkInfo())
                         getRemoteInfo(dp);
@@ -353,66 +389,84 @@ public class MainActivity extends Activity {
                     if (dp.getResponseData() == null)
                         return;
 
-                    if (isDownload) {
-                        byte resdata[] = android.util.Base64.decode(dp.getResponseData(),
-                                Base64.DEFAULT);
-                        try {
-                            String data = new String(resdata, "UTF-8");
-                            //Save the data to filesystem, will change every time
-                            writeFile("data.xml", data);
-                            mData = domService.getDataResult(data);
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    byte resdata[] = android.util.Base64.decode(dp.getResponseData(),
+                            Base64.DEFAULT);
+                    try {
+                        String data = new String(resdata, "UTF-8");
+                        //Save the data to filesystem, will change every time
+                        writeFile("data.xml", data);
+                        mData = domService.getDataResult(data);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    // recheck the information after we sync the data from the server
+                    waitNetworkToDownload = false;
+                    if (mWaitingFlag == PASSWORD) {
+                        mWaitingFlag = 0;
+                        //arg1 == 1, will not try again when password is incorrect
+                        Message msg1 = mEventHandler.obtainMessage(PASSWORD, 1, 0, passwordRecord);
+                        mEventHandler.sendMessage(msg1);
+
+                    } else if (mWaitingFlag == RFIDCARD) {
+                        mWaitingFlag = 0;
+                        Message msg1 = mEventHandler.obtainMessage(RFIDCARD, 1, 0, rfidcardRecord);
+                        mEventHandler.sendMessage(msg1);
+                    } else if (mWaitingFlag == BARCODE) {
+                        mWaitingFlag = 0;
+                        Message msg1 = mEventHandler.obtainMessage(BARCODE, 1, 0, barcodeRecord);
+                        mEventHandler.sendMessage(msg1);
+                    }
+                } else if (msg.what == UPLOAD) {
+                    if (Debug) Log.d(TAG, "Handle Upload");
+
+                    DataPackage dp = new DataPackage();
+
+                    generateUploadPack(dp);
+
+                    if (dp.getRequestData().equals("")) {
+                        return;
+                    }
+
+                    if (checkNetworkInfo())
+                        getRemoteInfo(dp);
+                    else {
+                        return;
+                    }
+
+                    if (dp.getResponseData() == null)
+                        return;
+
+                    String result = decodeBase64(dp.getResponseData());
+                    try {
+                        if (domService.getUploadResult(result) != 0) {
+                            Log.e(TAG, "Error occur when upload data, Error code = " + result);
+                            return;
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
-                        // recheck the information after we sync the data from the server
-                        if (mWaitingFlag == PASSWORD) {
-                            mWaitingFlag = 0;
-                            //arg1 == 1, will not try again when password is incorrect
-                            Message msg1 = mEventHandler.obtainMessage(PASSWORD, 1, 0, passwordRecord);
-                            mEventHandler.sendMessage(msg1);
-
-                        } else if (mWaitingFlag == RFIDCARD) {
-                            mWaitingFlag = 0;
-                            Message msg1 = mEventHandler.obtainMessage(RFIDCARD, 1, 0, rfidcardRecord);
-                            mEventHandler.sendMessage(msg1);
-                        } else if (mWaitingFlag == BARCODE) {
-                            mWaitingFlag = 0;
-                            Message msg1 = mEventHandler.obtainMessage(BARCODE, 1, 0, barcodeRecord);
-                            mEventHandler.sendMessage(msg1);
-                        }
-
-                    } else {
-                        String result = decodeBase64(dp.getResponseData());
-                        try {
-                            if (domService.getUploadResult(result) != 0) {
-                                Log.e(TAG, "Error occur when upload data, Error code = " + result);
-                                return;
+                    waitNetworkToUpload = false;
+                    if (Debug) dumpUpload();
+                    //Upload success,remove the uploaded Upload in mUpload and wipe the upload.xml
+                    try {
+                        String ul = readFile("upload.xml");
+                        writeFile("upload.xml", "");
+                        List<Upload> uploadedList = domService.getUpload(ul);
+                        for (Upload uploaded : uploadedList) {
+                            for (Upload upload : mUpload) {
+                                if (uploaded.getTradeNo().equals(upload.getTradeNo())) {
+                                    mUpload.remove(upload);
+                                }
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
-
-                        //Upload success,remove the uploaded Upload in mUpload
-                        try {
-                            String ul = readFile("upload.xml");
-                            writeFile("upload.xml", "");
-                            List<Upload> uploadedList = domService.getUpload(ul);
-                            for (Upload uploaded : uploadedList) {
-                                for (Upload upload : mUpload)
-                                    if (uploaded.getTradeNo().equals(upload.getTradeNo())) {
-                                        mUpload.remove(upload);
-
-                                    }
-                            }
-                            dumpUpload();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -444,7 +498,7 @@ public class MainActivity extends Activity {
     }
 
     private int checkPassword(int password) {
-        dumpData();
+        if (Debug) dumpData();
         int boxNum;
         for (Data data : mData) {
             if (password == data.getPassword()) {
@@ -471,14 +525,14 @@ public class MainActivity extends Activity {
     private int checkBarCode(String barcode) {
         int boxNum;
         for (Data data : mData) {
-            if (barcode.equals(data.getTradeNo())) {
+            if (barcode.equals(String.valueOf(data.getPassword()))) {
                 boxNum = data.getBoxNo();
 
                 openDoor(boxNum);
 
                 // Record the passwordopen box data to filesystem
                 mUpload.add(generateUpload(2, data));
-
+                mData.remove(data);
                 try {
                     writeFile("upload.xml", domService.putUpload(mUpload));
                 } catch (Exception e) {
@@ -487,7 +541,7 @@ public class MainActivity extends Activity {
                 return boxNum;
             }
         }
-
+        barcodeRecord = barcode;
         return 0;
     }
 
@@ -509,40 +563,17 @@ public class MainActivity extends Activity {
     private void openDoor(int doorNo) {
         int fd;
 
-        fd = Linuxc.openUart("/dev/ttyS7");
+        fd = Linuxc.openUart(Config.electronicLockDevice);
         if (fd < 0) {
             Log.e(TAG, "Hardware error");
             return;
         }
-        Linuxc.setUart(9600);
+        Linuxc.setUart(Config.electronicLockBaudRate);
 
-
-        String GPIO = "/sys/class/power_supply/battery/device/uart485_gpio_state";
-        writeSDFile(GPIO, "1");
-        //Linuxc.send485HexUart(3);
         Linuxc.sendHexUart(keyOfLock(doorNo));
-
         Linuxc.closeUart();
-        writeSDFile(GPIO, "0");
-        Log.d(TAG, "The number of the door  " + doorNo + " is open!");
-    }
 
-
-    public void writeSDFile(String fileName, String write_str) {
-
-        File file = new File(fileName);
-
-        FileOutputStream fos;
-        try {
-            fos = new FileOutputStream(file);
-            byte [] bytes = write_str.getBytes();
-            fos.write(bytes);
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if(Debug) Log.d(TAG, "The number of the door  " + doorNo + " is open!");
     }
 
     private int[] keyOfLock(int doorNo) {
@@ -557,13 +588,13 @@ public class MainActivity extends Activity {
     @TargetApi(Build.VERSION_CODES.FROYO)
     private void getRemoteInfo(DataPackage dp) {
         // 命名空间
-        String nameSpace = "http://soap.webservice.scaffold.goldenvista.com/";
+        String nameSpace = Config.serverNameSpace;
         // 调用的方法名称
-        String methodName = "service";
+        String methodName = Config.serverMethodName;
         // EndPoint
-        String endPoint = "http://118.144.127.105:5005/Box_Service/webservice/soap";
+        String endPoint = Config.serverEndPoint;
         // SOAP Action
-        String soapAction = "http://soap.webservice.scaffold.goldenvista.com/service";
+        String soapAction = Config.serverSoapAction;
 
         // 指定WebService的命名空间和调用的方法名
         SoapObject rpc = new SoapObject(nameSpace, methodName);

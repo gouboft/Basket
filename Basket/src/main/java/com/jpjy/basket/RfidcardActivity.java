@@ -13,17 +13,12 @@ import android.widget.Toast;
 
 import com.jpjy.basket.MainActivity.EventHandler;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 public class RfidcardActivity extends Activity {
     private static final int RFIDCARD = 0x0010;
     private static final String TAG = "RfidcardActivity";
     private RfidThread mRfidThread;
     private EventHandler mEventHandler;
 
-    private FileInputStream mRfidCard;
 
     private boolean isInput;
     private String mCardNumber;
@@ -38,12 +33,17 @@ public class RfidcardActivity extends Activity {
         MyApplication myApplication = (MyApplication) getApplication();
         mEventHandler = myApplication.getHandler();
 
+        int fd = Linuxc.openUart(Config.RFIDCardDevice);
+        if(fd > 0) {
+            Log.d(TAG, Config.RFIDCardDevice + " is open");
+        }
+
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 if (!isInput) {
                     Intent intent = new Intent(RfidcardActivity.this, ChoiceActivity.class);
                     RfidcardActivity.this.startActivity(intent);
-                    RfidcardActivity.this.finish();
+                    Linuxc.closeUart();
                 }
             }
         }, 20000);
@@ -52,12 +52,6 @@ public class RfidcardActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        try {
-            mRfidCard = new FileInputStream("/dev/rfid_rc522_dev");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
         if (mRfidThread == null) {
             mRfidThread = new RfidThread();
             mRfidThread.start();
@@ -66,7 +60,8 @@ public class RfidcardActivity extends Activity {
 
     protected void onPause() {
         super.onPause();
-        Toast.makeText(RfidcardActivity.this, "读到卡： " + mCardNumber, Toast.LENGTH_LONG).show();
+        if (mCardNumber != null)
+            Toast.makeText(RfidcardActivity.this, "读到卡： " + mCardNumber, Toast.LENGTH_LONG).show();
         // Stop the Read card thread
         if (mRfidThread != null) {
             mRfidThread = null;
@@ -92,30 +87,18 @@ public class RfidcardActivity extends Activity {
         public void run() {
             super.run();
             while (!isInterrupted()) {
-                try {
-                    byte[] BufferRfid = new byte[4];
+                //TODO check the password, if the password is changed, write it to kernel
 
-                    if (mRfidCard != null) {
-                        int num = mRfidCard.read(BufferRfid);
-                            mCardNumber = Integer.toHexString(byte2int(BufferRfid)).toUpperCase();
-                        if (num != 4)
-                            return;
-                        Log.d(TAG, "RFID card number is " + mCardNumber);
-                        isInput = true;
-                        mRfidCard.close();
-                        mRfidThread.interrupt();
-                        Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, mCardNumber);
-                        mEventHandler.sendMessage(msg);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                mCardNumber = Linuxc.receiveMsgUart();
+                if(mCardNumber != null) {
+                    Log.d(TAG, "RFID card number is " + mCardNumber);
+                    isInput = true;
+                    Linuxc.closeUart();
+                    mRfidThread.interrupt();
+                    Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, mCardNumber);
+                    mEventHandler.sendMessage(msg);
                 }
             }
         }
-    }
-
-    private static int byte2int(byte[] res) {
-        return (res[3] & 0xff) | ((res[2] << 8) & 0xff00)
-                | ((res[1] << 24) >>> 8) | (res[0] << 24);
     }
 }
