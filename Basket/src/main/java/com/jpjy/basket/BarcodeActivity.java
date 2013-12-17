@@ -60,18 +60,8 @@ public class BarcodeActivity extends Activity {
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 if (!isInput) {
-                    mBarcodeThread.interrupt();
-                    mBarcodeThread = null;
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    SettingValue(CommandStop);
                     Intent intent = new Intent(BarcodeActivity.this, ChoiceActivity.class);
                     BarcodeActivity.this.startActivity(intent);
-
-                    Linuxc.closeUart();
                 }
             }
         }, 20000);
@@ -92,8 +82,16 @@ public class BarcodeActivity extends Activity {
             Toast.makeText(BarcodeActivity.this, "读到条码： " + mBarcode, Toast.LENGTH_LONG).show();
         // Stop the Read card thread
         if (mBarcodeThread != null) {
+            mBarcodeThread.interrupt();
             mBarcodeThread = null;
         }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        SettingValue(CommandStop);
+        Linuxc.closeUart();
         finish();
     }
 
@@ -104,7 +102,7 @@ public class BarcodeActivity extends Activity {
                 Intent intent = new Intent(BarcodeActivity.this,
                         ChoiceActivity.class);
                 startActivity(intent);
-                BarcodeActivity.this.finish();
+
                 break;
         }
         return true;
@@ -119,7 +117,6 @@ public class BarcodeActivity extends Activity {
                 if (mBarcode != null) {
                     isInput = true;
 
-                    Linuxc.closeUart();
                     Log.d(TAG, "Barcode = " + mBarcode);
                     mBarcodeThread.interrupt();
                     Message msg = mEventHandler.obtainMessage(BARCODE, 0, 0, mBarcode);

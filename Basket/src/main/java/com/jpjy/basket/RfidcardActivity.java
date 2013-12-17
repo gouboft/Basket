@@ -43,7 +43,6 @@ public class RfidcardActivity extends Activity {
                 if (!isInput) {
                     Intent intent = new Intent(RfidcardActivity.this, ChoiceActivity.class);
                     RfidcardActivity.this.startActivity(intent);
-                    Linuxc.closeUart();
                 }
             }
         }, 20000);
@@ -64,8 +63,15 @@ public class RfidcardActivity extends Activity {
             Toast.makeText(RfidcardActivity.this, "读到卡： " + mCardNumber, Toast.LENGTH_LONG).show();
         // Stop the Read card thread
         if (mRfidThread != null) {
+            mRfidThread.interrupt();
             mRfidThread = null;
         }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Linuxc.closeUart();
         finish();
     }
 
@@ -76,7 +82,6 @@ public class RfidcardActivity extends Activity {
                 Intent intent = new Intent(RfidcardActivity.this,
                         ChoiceActivity.class);
                 startActivity(intent);
-                RfidcardActivity.this.finish();
                 break;
         }
         return true;
@@ -93,7 +98,7 @@ public class RfidcardActivity extends Activity {
                 if(mCardNumber != null) {
                     Log.d(TAG, "RFID card number is " + mCardNumber);
                     isInput = true;
-                    Linuxc.closeUart();
+
                     mRfidThread.interrupt();
                     Message msg = mEventHandler.obtainMessage(RFIDCARD, 0, 0, mCardNumber);
                     mEventHandler.sendMessage(msg);

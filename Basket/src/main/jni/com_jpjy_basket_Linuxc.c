@@ -97,7 +97,7 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_setUart(JNIEnv *env,jobject m
     struct termios newtio,oldtio;
     int  speed_arr[]={B1200,B2400,B4800,B9600,B19200,B38400,B57600,B115200,B230400,B921600};
     int  speed_int[]={ 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 921600};
-    int  i;
+    unsigned int  i;
 
         LOGI("jni setUart devices baud rate !") ;
         for(i =0 ; i < sizeof(speed_int)/sizeof(int); i++)
@@ -149,6 +149,7 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendMsgUart(JNIEnv *env,jobje
 
     LOGI("jni write to %s data to devices !",buf) ;
     (*env)->ReleaseStringUTFChars(env, str, buf);
+    return len;
 }
 
 //连续发送一个数组的16进制数据
@@ -185,6 +186,7 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_sendHexUart(JNIEnv *env,jobje
 
     (*env)->ReleaseIntArrayElements(env, arr, buf,0);
     LOGI("jni write to  data to devices !") ;
+    return len;
 }
 
 
@@ -255,6 +257,7 @@ JNIEXPORT jint JNICALL Java_com_jpjy_basket_Linuxc_send485HexUart(JNIEnv *env,jo
      LOGI("jni write to %c data to uart485_gpio_state !",dat0) ;
     write(ttyS7gpioFd, &dat0, sizeof(dat0));
 
+    return n;
 
 }
 

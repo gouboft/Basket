@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
     private static final int UPLOAD = 0x0101;
     private static final int BARCODE = 0x1000;
 
-    private final int NETWORK_TYPE = ConnectivityManager.TYPE_WIFI;
+    private final int NETWORK_TYPE = ConnectivityManager.TYPE_MOBILE;
 
     private DomService domService;
 
@@ -451,21 +451,11 @@ public class MainActivity extends Activity {
 
                     waitNetworkToUpload = false;
                     if (Debug) dumpUpload();
-                    //Upload success,remove the uploaded Upload in mUpload and wipe the upload.xml
+                    //Upload success,clear the mUpload and wipe the upload.xml
                     try {
-                        String ul = readFile("upload.xml");
                         writeFile("upload.xml", "");
-                        List<Upload> uploadedList = domService.getUpload(ul);
-                        for (Upload uploaded : uploadedList) {
-                            for (Upload upload : mUpload) {
-                                if (uploaded.getTradeNo().equals(upload.getTradeNo())) {
-                                    mUpload.remove(upload);
-                                }
-                            }
-                        }
+                        mUpload.clear();
                     } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -525,7 +515,7 @@ public class MainActivity extends Activity {
     private int checkBarCode(String barcode) {
         int boxNum;
         for (Data data : mData) {
-            if (barcode.equals(String.valueOf(data.getPassword()))) {
+            if (data.getPassword() == Integer.parseInt(barcode.substring(0, 6))) {
                 boxNum = data.getBoxNo();
 
                 openDoor(boxNum);
@@ -681,7 +671,7 @@ public class MainActivity extends Activity {
 
 
     private void dumpData() {
-        if (mData.size() > 0)
+        if (mData.size() == 0)
             return;
         Log.d(TAG, "The number mData have ------- " + mData.size() + " ------- Data");
         for (int i = 0; i < mData.size(); i++) {
@@ -694,7 +684,7 @@ public class MainActivity extends Activity {
     }
 
     private void dumpUpload() {
-        if (mUpload.size() > 0)
+        if (mUpload.size() == 0)
             return;
         Log.d(TAG, "The number of mUpload have ------- " + mUpload.size() + " ------- Upload");
         for (int i = 0; i < mUpload.size(); i++) {

@@ -21,10 +21,7 @@ public class ChoiceActivity extends Activity {
         setContentView(R.layout.activity_main);
     }
 
-    public void onPause() {
-        super.onPause();
-        finish();
-    }
+
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
@@ -33,16 +30,19 @@ public class ChoiceActivity extends Activity {
                 intent = new Intent(ChoiceActivity.this,
                         PasswordActivity.class);
                 startActivity(intent);
+                finish();
                 break;
             case KeyEvent.KEYCODE_2:
                 intent = new Intent(ChoiceActivity.this,
                         RfidcardActivity.class);
                 startActivity(intent);
+                finish();
                 break;
             case KeyEvent.KEYCODE_3:
                 intent = new Intent(ChoiceActivity.this,
                         BarcodeActivity.class);
                 startActivity(intent);
+                finish();
                 break;
         }
 
