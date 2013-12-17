@@ -26,7 +26,8 @@ public class MyApplication extends Application {
     public void setHandler(EventHandler handler) {
         mHandler = handler;
     }
-    public  EventHandler getHandler() {
+
+    public EventHandler getHandler() {
         return mHandler;
     }
 }

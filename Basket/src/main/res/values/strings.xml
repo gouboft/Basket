@@ -19,8 +19,8 @@
     <string name="press1">按“</string>
     <string name="cancel">取消</string>
     <string name="press2">返回。</string>
-    <string name="press3">” 。按“</string>
-    <string name="input">请输入6位密码后</string>
+    <string name="press3">” 。</string>
+    <string name="input">请输入11位手机号，并</string>
     <string name="xx">********</string>
 
     <string name="open1">号抽屉已打开，请取出</string>
@@ -57,6 +57,7 @@
     <string name="openout1">XX</string>
     <string name="openout2">柜</string>
     <string name="ok">确定</string>
+    <string name="smssending">正在发送到：</string>
 
 
 </resources>

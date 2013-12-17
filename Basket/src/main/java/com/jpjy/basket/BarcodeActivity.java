@@ -19,10 +19,10 @@ public class BarcodeActivity extends Activity {
     private final String ENTER_SETTING = "$$$$";
     private final String EXIT_SETTING = "%%%%";
     private final String ENTER_SETTING_SUCCESS = "@@@@";
-    private final String EXIT_SETTING_SUCCESS  = "^^^^";
+    private final String EXIT_SETTING_SUCCESS = "^^^^";
 
-    private final String CommandStart   = "99900035";
-    private final String CommandStop    = "99900036";
+    private final String CommandStart = "99900035";
+    private final String CommandStop = "99900036";
 
     private static final int BARCODE = 0x1000;
 
@@ -40,7 +40,7 @@ public class BarcodeActivity extends Activity {
         setContentView(R.layout.barcode);
 
         int fd = Linuxc.openUart(Config.barcodeDevice);
-        if(fd > 0) {
+        if (fd > 0) {
             Linuxc.setUart(Config.barcodeBaudRate);
             Log.d(TAG, Config.barcodeDevice + " is open");
         }
@@ -125,7 +125,6 @@ public class BarcodeActivity extends Activity {
             }
         }
     }
-
 
 
     private boolean SettingValue(String setValue) {

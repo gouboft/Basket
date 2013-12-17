@@ -3,16 +3,12 @@ package com.jpjy.basket;
 import android.util.Log;
 
 public class Linuxc {
-    static
-    {
-        try
-        {
+    static {
+        try {
             System.loadLibrary("uart");
-            Log.i("JIN","Trying to load libuart.so");
-        }
-        catch(UnsatisfiedLinkError ule)
-        {
-            Log.e("JIN","WARNING:could not load libuart.so");
+            Log.i("JIN", "Trying to load libuart.so");
+        } catch (UnsatisfiedLinkError ule) {
+            Log.e("JIN", "WARNING:could not load libuart.so");
         }
     }
 
@@ -25,7 +21,7 @@ public class Linuxc {
     // * Others:       // 无
     // */
     // -----------------------------------------------------------------------------------------------------------
-    public static native int openUart(String str);  
+    public static native int openUart(String str);
 
     //------------------------------------------------------------------------------------------------------------
     ///*
@@ -38,7 +34,7 @@ public class Linuxc {
     // */
     // -----------------------------------------------------------------------------------------------------------
     public static native void closeUart();
-    
+
 
     //------------------------------------------------------------------------------------------------------------
     ///*
@@ -51,7 +47,7 @@ public class Linuxc {
     // */
     // -----------------------------------------------------------------------------------------------------------
     public static native int setUart(int baudrate);
-    
+
 
     //------------------------------------------------------------------------------------------------------------
     ///*
@@ -64,8 +60,7 @@ public class Linuxc {
     // */
     // -----------------------------------------------------------------------------------------------------------
     public static native int sendMsgUart(String str);
-    
-    
+
 
     //------------------------------------------------------------------------------------------------------------
     ///*
@@ -77,9 +72,8 @@ public class Linuxc {
     // * Others:       // 
     // */
     // -----------------------------------------------------------------------------------------------------------
-    public static native String  receiveMsgUart();
-    
-    
+    public static native String receiveMsgUart();
+
 
     //------------------------------------------------------------------------------------------------------------
     ///*
@@ -91,9 +85,9 @@ public class Linuxc {
     // * Others:       // java中比如：int wfliao[] = new int[10]; 然后for(int i=0;i< 10; i++)  wfliao[i]=0x12 ........
     // */
     // -----------------------------------------------------------------------------------------------------------
-    public static native int  sendHexUart(int[] arr);
-    
-    
+    public static native int sendHexUart(int[] arr);
+
+
     //------------------------------------------------------------------------------------------------------------
     ///*
     // * Function:     // 485 写16进制
@@ -104,8 +98,8 @@ public class Linuxc {
     // * Others:       // java中直接 传整形数，0----255的范围
     // */
     // -----------------------------------------------------------------------------------------------------------
-    public static native int  send485HexUart(int number);
-    
+    public static native int send485HexUart(int number);
+
 
 }
 

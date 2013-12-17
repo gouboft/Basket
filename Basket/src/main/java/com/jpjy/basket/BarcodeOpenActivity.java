@@ -3,13 +3,14 @@ package com.jpjy.basket;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 public class BarcodeOpenActivity extends Activity {
     private Intent intent;
+    private int boxNum;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,17 +20,21 @@ public class BarcodeOpenActivity extends Activity {
         setContentView(R.layout.rfidcardopen);
 
         Intent intent = getIntent();
-        int boxNum = intent.getIntExtra("BoxNum", 0);
+        boxNum = intent.getIntExtra("BoxNum", 0);
         TextView tv = (TextView) findViewById(R.id.in1);
         tv.setText(String.valueOf(boxNum));
+    }
 
-        new Handler().postDelayed(new Runnable() {
-            public void run() {
-                Intent intent = new Intent(BarcodeOpenActivity.this, ChoiceActivity.class);
-                BarcodeOpenActivity.this.startActivity(intent);
-                BarcodeOpenActivity.this.finish();
-            }
-        }, 5000);
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                && event.getAction() != KeyEvent.ACTION_UP) {
+
+            Intent intent = new Intent(BarcodeOpenActivity.this, PhoneNumInputActivity.class);
+            intent.putExtra("BoxNum", boxNum);
+            startActivity(intent);
+        }
+        return super.dispatchKeyEvent(event);
     }
 
 }

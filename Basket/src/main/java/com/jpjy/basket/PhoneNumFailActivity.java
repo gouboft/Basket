@@ -9,21 +9,20 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-public class RfidcardFailActivity extends Activity {
+public class PhoneNumFailActivity extends Activity {
+
     private Intent intent;
     private boolean isInput = false;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.rfidcardfail);
+        setContentView(R.layout.passwordfail);
 
         Intent intent = getIntent();
         String er = intent.getStringExtra("ErrorReason");
-
         TextView tv = (TextView) findViewById(R.id.ou);
         tv.setText(er);
 
@@ -31,12 +30,12 @@ public class RfidcardFailActivity extends Activity {
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 if (!isInput) {
-                    Intent intent = new Intent(RfidcardFailActivity.this, ChoiceActivity.class);
-                    RfidcardFailActivity.this.startActivity(intent);
-                    RfidcardFailActivity.this.finish();
+                    Intent intent = new Intent(PhoneNumFailActivity.this, ChoiceActivity.class);
+                    PhoneNumFailActivity.this.startActivity(intent);
+                    PhoneNumFailActivity.this.finish();
                 }
             }
-        }, 2000);
+        }, 10000);
 
     }
 
@@ -45,10 +44,10 @@ public class RfidcardFailActivity extends Activity {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DEL:
                 isInput = true;
-                intent = new Intent(RfidcardFailActivity.this,
+                intent = new Intent(PhoneNumFailActivity.this,
                         ChoiceActivity.class);
                 startActivity(intent);
-                RfidcardFailActivity.this.finish();
+                PhoneNumFailActivity.this.finish();
                 break;
         }
         return true;
@@ -58,14 +57,15 @@ public class RfidcardFailActivity extends Activity {
         if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER
                 && event.getAction() != KeyEvent.ACTION_UP) {
             isInput = true;
-            intent = new Intent(RfidcardFailActivity.this,
-                    RfidcardActivity.class);
+
+            intent = new Intent(PhoneNumFailActivity.this,
+                    PhoneNumInputActivity.class);
             startActivity(intent);
 
             return true;
 
         }
-        //CardFailActivity.this.finish();
+        //PasswordFailActivity.this.finish();
         return super.dispatchKeyEvent(event);
     }
 
