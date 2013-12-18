@@ -41,6 +41,15 @@
         </activity>
         <activity android:name="PasswordFailActivity">
         </activity>
+        <activity android:name=".PhoneNumInputActivity">
+        </activity>
+        <activity android:name=".PhoneNumConfirmActivity">
+        </activity>
+        <activity android:name=".PhoneNumFailActivity">
+        </activity>
+        <activity android:name=".SmsSendingActivity">
+        </activity>
+
     </application>
 
 

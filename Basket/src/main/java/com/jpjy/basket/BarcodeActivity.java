@@ -38,6 +38,7 @@ public class BarcodeActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.barcode);
+/*
 
         int fd = Linuxc.openUart(Config.barcodeDevice);
         if (fd > 0) {
@@ -47,15 +48,12 @@ public class BarcodeActivity extends Activity {
 
         if (!initSetting() || !SettingValue(CommandStart))
             Log.d(TAG, "Hardware Error");
+*/
 
         MyApplication myApplication = (MyApplication) getApplication();
         mEventHandler = myApplication.getHandler();
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GotoSleep(1000);
 
         new Handler().postDelayed(new Runnable() {
             public void run() {
@@ -85,13 +83,9 @@ public class BarcodeActivity extends Activity {
             mBarcodeThread.interrupt();
             mBarcodeThread = null;
         }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        SettingValue(CommandStop);
-        Linuxc.closeUart();
+        GotoSleep(100);
+/*        SettingValue(CommandStop);*/
+/*        Linuxc.closeUart();*/
         finish();
     }
 
@@ -113,14 +107,16 @@ public class BarcodeActivity extends Activity {
         public void run() {
             super.run();
             while (!isInterrupted()) {
-                mBarcode = Linuxc.receiveMsgUart();
+/*                mBarcode = Linuxc.receiveMsgUart();*/
+                mBarcode = "1234567890";
                 if (mBarcode != null) {
                     isInput = true;
 
                     Log.d(TAG, "Barcode = " + mBarcode);
-                    mBarcodeThread.interrupt();
+
                     Message msg = mEventHandler.obtainMessage(BARCODE, 0, 0, mBarcode);
                     mEventHandler.sendMessage(msg);
+                    mBarcodeThread.interrupt();
                 }
             }
         }
@@ -132,11 +128,7 @@ public class BarcodeActivity extends Activity {
 
         //Enter setting
         Linuxc.sendMsgUart(ENTER_SETTING);
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GotoSleep(100);
         receiveValue = Linuxc.receiveMsgUart();
         if (receiveValue == null || !receiveValue.equals(ENTER_SETTING_SUCCESS))
             return false;
@@ -144,11 +136,7 @@ public class BarcodeActivity extends Activity {
         //Send the setting value
         String sendValue = "#" + setValue + ";";
         Linuxc.sendMsgUart(sendValue);
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GotoSleep(100);
         receiveValue = Linuxc.receiveMsgUart();
         if (receiveValue == null || !receiveValue.equals("!" + setValue + ";"))
             return false;
@@ -156,11 +144,7 @@ public class BarcodeActivity extends Activity {
 
         //Exit setting
         Linuxc.sendMsgUart(EXIT_SETTING);
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GotoSleep(100);
         receiveValue = Linuxc.receiveMsgUart();
         return !(receiveValue == null || !receiveValue.equals(EXIT_SETTING_SUCCESS));
 
@@ -171,11 +155,7 @@ public class BarcodeActivity extends Activity {
 
         //Enter setting
         Linuxc.sendMsgUart(ENTER_SETTING);
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GotoSleep(100);
         receiveValue = Linuxc.receiveMsgUart();
         if (receiveValue == null || !receiveValue.equals(ENTER_SETTING_SUCCESS))
             return false;
@@ -185,11 +165,7 @@ public class BarcodeActivity extends Activity {
         for (String setValue : setValues) {
             String sendValue = "#" + setValue + ";";
             Linuxc.sendMsgUart(sendValue);
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            GotoSleep(100);
             receiveValue = Linuxc.receiveMsgUart();
             if (receiveValue == null || !receiveValue.equals("!" + setValue + ";"))
                 return false;
@@ -197,14 +173,18 @@ public class BarcodeActivity extends Activity {
 
         //Exit setting
         Linuxc.sendMsgUart(EXIT_SETTING);
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GotoSleep(100);
         receiveValue = Linuxc.receiveMsgUart();
 
         return !(receiveValue == null || !receiveValue.equals(EXIT_SETTING_SUCCESS));
 
+    }
+
+    private void GotoSleep(int time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -85,90 +85,74 @@
         android:layout_height="1dp"
         android:background="@color/brown1"
         android:layout_width="fill_parent"
-        android:id="@+id/line2"
-
-        />
+        android:id="@+id/line2" />
 
     <TextView
-        android:layout_width="fill_parent"
+        android:layout_width="25dp"
         android:layout_height="wrap_content"
-        android:gravity="center|center_horizontal|center_vertical"
-        android:layout_marginTop="15dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="20dp"
         android:layout_below="@+id/line2"
-        android:text="@string/fail"
-        android:textColor="@color/red2"
-        android:textSize="38sp"
-        android:textStyle="bold"
-        android:id="@+id/ou"/>
-
-    <TextView
-        android:layout_width="40dp"
-        android:layout_height="35dp"
-
-        android:layout_marginLeft="70dp"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/ou"
-        android:text="@string/press1"
+        android:text="@string/open3"
         android:textColor="@color/black"
         android:textSize="28sp"
         android:id="@+id/in"/>
 
-    <Button
-        android:id="@+id/enter"
-        android:layout_marginTop="10dp"
+    <TextView
+        android:layout_width="35dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:layout_toRightOf="@+id/in"
-        android:layout_below="@+id/ou"
-        android:layout_width="60dp"
-        android:layout_height="35dp"
+        android:layout_below="@+id/line2"
+        android:text="@string/openout1"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="28sp"
+        android:id="@+id/in1" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/in1"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/line2"
+        android:text="@string/open1"
+        android:textColor="@color/black"
+        android:textSize="28sp"
+        android:id="@+id/in2"/>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/in1"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/line2"
+        android:text="@string/open1"
+        android:textColor="@color/black"
+        android:textSize="28sp"
+        android:id="@+id/in6"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/in2"
         android:text="@string/enter"
-        android:textColor="@color/black"
-        android:background="@color/white"
-        android:textSize="28sp" />
+        android:textColor="@color/green1"
+        android:textSize="28sp"
+        android:id="@+id/in4"/>
 
     <TextView
-        android:layout_below="@+id/ou"
-        android:layout_toRightOf="@+id/enter"
-        android:layout_width="250dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="10dp"
-        android:text="@string/failreason1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/in6"
+        android:layout_toRightOf="@+id/in4"
+        android:layout_marginTop="5dp"
+        android:text="@string/press3"
         android:textColor="@color/black"
         android:textSize="28sp"
-        android:id="@+id/pre"/>
-
-    <TextView
-        android:layout_below="@+id/in"
-        android:layout_marginLeft="70dp"
-        android:layout_width="40dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="5dp"
-        android:text="@string/press1"
-        android:textColor="@color/black"
-        android:textSize="28sp"
-        android:id="@+id/pree"/>
-
-    <Button
-        android:id="@+id/cancel"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/pree"
-        android:layout_below="@+id/in"
-        android:layout_width="60dp"
-        android:layout_height="35dp"
-        android:text="@string/cancel"
-        android:textColor="@color/black"
-        android:background="@color/white"
-        android:textSize="28sp" />
-
-    <TextView
-        android:layout_toRightOf="@+id/cancel"
-        android:layout_below="@+id/in"
-        android:layout_width="120dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="5dp"
-        android:text="@string/failreason2"
-        android:textColor="@color/black"
-        android:textSize="28sp"
-        android:id="@+id/prees"/>
+        android:id="@+id/in5"/>
 
     <TextView
         android:layout_width="fill_parent"

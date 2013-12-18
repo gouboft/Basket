@@ -23,7 +23,7 @@ public class PhoneNumInputActivity extends Activity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.inputphonenumber);
+        setContentView(R.layout.phonenuminput);
 
         Intent intent = getIntent();
         boxNum = intent.getIntExtra("BoxNum", 0);
@@ -32,6 +32,12 @@ public class PhoneNumInputActivity extends Activity {
         editText.requestFocus();
         editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(11)});
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
     }
 
     @Override
@@ -52,8 +58,8 @@ public class PhoneNumInputActivity extends Activity {
                 intent.putExtra("PhoneNumber", phoneNumber);
                 intent.putExtra("BoxNum", boxNum);
                 startActivity(intent);
-
             }
+            return true;
         }
 
 

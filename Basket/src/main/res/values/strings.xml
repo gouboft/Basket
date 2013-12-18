@@ -8,7 +8,7 @@
     <string name="welcomeword">欢迎使用智能货柜</string>
     <string name="passwordkai">1 密码开柜请按1</string>
     <string name="postcardkai">2 刷卡开柜请按2</string>
-    <string name="barcardkai">3 条码开柜请按3</string>
+    <string name="barcardkai">2 条码开柜请按2</string>
     <string name="telnum">电话4008301230</string>
 
     <string name="lo1">智能柜族</string>
@@ -19,18 +19,19 @@
     <string name="press1">按“</string>
     <string name="cancel">取消</string>
     <string name="press2">返回。</string>
-    <string name="press3">” 。</string>
+    <string name="press3">”键继续。</string>
     <string name="input">请输入11位手机号，并</string>
     <string name="xx">********</string>
 
-    <string name="open1">号抽屉已打开，请取出</string>
+    <string name="open1">号抽屉已打开，请放入您的物品并关上柜门，并按“</string>
     <string name="open2">密码开柜</string>
     <string name="open3">第</string>
-    <string name="open4">您的物品并关好柜门，谢谢！</string>
+    <string name="open4">确定</string>
+    <string name="open5">”键继续，按“取消”键重新输入。</string>
 
     <string name="fail">（失败原因）</string>
     <string name="fail1">按“</string>
-    <string name="press5">” 重新输入密码，</string>
+    <string name="press5">” 重新输入，</string>
     <string name="fail2">” 返回</string>
 
     <string name="swipe1">请将会员卡放置于“</string>
@@ -58,6 +59,9 @@
     <string name="openout2">柜</string>
     <string name="ok">确定</string>
     <string name="smssending">正在发送到：</string>
+
+    <string name="confirm">你输入的手机号为：</string>
+    <string name="phonenumber">13877778888</string>
 
 
 </resources>

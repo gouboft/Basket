@@ -30,7 +30,7 @@ public class DomService {
     public DomService() {
     }
 
-    public List<Data> getDataResult(String dataString) throws Exception {
+    public List<Data> getData(String dataString) throws Exception {
         List<Data> list;
 
         InputStream inputStream = new ByteArrayInputStream(dataString.getBytes());
@@ -62,8 +62,8 @@ public class DomService {
             int password = Integer.parseInt(element.getAttribute("Password"));
             data.setPassword(password);
 
-            int barcode = Integer.parseInt(element.getAttribute("Barcode"));
-            data.setBoxNumber(barcode);
+            String barcode = element.getAttribute("Barcode");
+            data.setBarcode(barcode);
 
             int boxNumber = Integer.parseInt(element.getAttribute("BoxNumber"));
             data.setBoxNumber(boxNumber);
@@ -93,9 +93,9 @@ public class DomService {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element elementNode = (Element) node;
                 elementNode.setAttribute("RecordTime", list.get(k).getRecordTime());
-                elementNode.setAttribute("PhoneNumber", String.valueOf(list.get(k).getPhoneNumber()));
-                elementNode.setAttribute("password", String.valueOf(list.get(k).getPassword()));
-                elementNode.setAttribute("barcode", String.valueOf(list.get(k).getBarcode()));
+                elementNode.setAttribute("PhoneNumber", list.get(k).getPhoneNumber());
+                elementNode.setAttribute("Password", String.valueOf(list.get(k).getPassword()));
+                elementNode.setAttribute("Barcode", list.get(k).getBarcode());
                 elementNode.setAttribute("BoxNumber", String.valueOf(list.get(k).getBoxNumber()));
             }
         }
@@ -111,6 +111,4 @@ public class DomService {
 
         return writer.toString();
     }
-
-
 }

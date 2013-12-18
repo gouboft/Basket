@@ -121,20 +121,6 @@
         android:background="@color/white"
         android:textSize="24sp" />
 
-
-    <Button
-        android:layout_below="@+id/passwordkai"
-        android:layout_marginLeft="60dp"
-        android:layout_marginRight="100dp"
-        android:id="@+id/postcardkai"
-        android:layout_width="fill_parent"
-        android:layout_height="35dp"
-        android:paddingRight="90dp"
-        android:text="@string/postcardkai"
-        android:textColor="@color/black"
-        android:background="@color/white"
-        android:textSize="24sp" />
-
     <Button
         android:layout_below="@+id/postcardkai"
         android:layout_marginLeft="60dp"

@@ -38,6 +38,8 @@ public class MainActivity extends Activity {
     private static final int PHONENUM = 0x0010;
     private static final int BARCODE = 0x1000;
 
+    private static String mBarcode = "";
+
     private DomService mDomService;
 
     private List<Data> mData;
@@ -45,7 +47,7 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.d(TAG, "onCreate");
         MyApplication myApp = (MyApplication) getApplication();
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -65,7 +67,7 @@ public class MainActivity extends Activity {
         try {
             String result = readFile("data.xml");
             if (!result.equals(""))
-                mData = mDomService.getDataResult(result);
+                mData = mDomService.getData(result);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -203,8 +205,7 @@ public class MainActivity extends Activity {
                     }
                 } else if (msg.what == BARCODE) {
                     if (Debug) Log.d(TAG, "Handle BarCode");
-                    String barCode = (String) msg.obj;
-                    int tag = msg.arg1;
+                    mBarcode = (String) msg.obj;
                     int boxNum = openEmptyCabinet();
                     if (boxNum == 0) {
                         Intent intent = new Intent(MainActivity.this, BarcodeFailActivity.class);
@@ -225,6 +226,7 @@ public class MainActivity extends Activity {
                     data.setPassword(password);
                     data.setPhoneNumber(phoneNumber);
                     data.setBoxNumber(boxNumber);
+                    data.setBarcode(mBarcode);
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
                     Date curDate = new Date(System.currentTimeMillis());
                     String str = formatter.format(curDate);
@@ -238,7 +240,8 @@ public class MainActivity extends Activity {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    sendShortMessage(boxNumber, password, phoneNumber);
+                    //sendShortMessage(boxNumber, password, phoneNumber);
+                    Log.d(TAG, "SendMessage ...........................");
                 }
             }
         }
@@ -249,9 +252,10 @@ public class MainActivity extends Activity {
         for (Data data : mData) {
             int boxNumber = data.getBoxNumber();
             flag[boxNumber] = 1;
+            Log.d(TAG, "flag[" + boxNumber + "] = " + flag[boxNumber]);
         }
 
-        for (int i = 0; i < Config.BOXNUMBER; i++) {
+        for (int i = 1; i < Config.BOXNUMBER; i++) {
             if (flag[i] != 1)
                 return i;
         }
@@ -285,7 +289,6 @@ public class MainActivity extends Activity {
         return "你的包裹已经放在" + boxNumber + "号箱，开箱密码为：" + password + "，请尽快取出，谢谢。";
     }
 
-
     private int checkPassword(int password) {
         int boxNum;
         for (Data data : mData) {
@@ -296,7 +299,7 @@ public class MainActivity extends Activity {
 
                 mData.remove(data);
                 try {
-                    writeFile("Data.xml", mDomService.putData(mData));
+                    writeFile("data.xml", mDomService.putData(mData));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -307,7 +310,7 @@ public class MainActivity extends Activity {
     }
 
     private void openDoor(int doorNo) {
-        int fd;
+/*        int fd;
 
         fd = Linuxc.openUart(Config.electronicLockDevice);
         if (fd < 0) {
@@ -319,7 +322,7 @@ public class MainActivity extends Activity {
         Linuxc.sendHexUart(keyOfLock(doorNo));
         Linuxc.closeUart();
 
-        if (Debug) Log.d(TAG, "The number of the door  " + doorNo + " is open!");
+        if (Debug) Log.d(TAG, "The number of the door  " + doorNo + " is open!");*/
     }
 
     private int[] keyOfLock(int doorNo) {

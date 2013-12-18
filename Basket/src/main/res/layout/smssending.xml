@@ -92,23 +92,22 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="center|center_horizontal|center_vertical"
         android:layout_marginTop="30dp"
+        android:layout_marginLeft="40dp"
         android:layout_below="@+id/line2"
         android:text="@string/smssending"
         android:textColor="@color/blue"
-        android:textSize="38sp"
-        android:textStyle="bold"
+        android:textSize="35sp"
         android:id="@+id/ou"/>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="center|center_horizontal|center_vertical"
+        android:layout_marginLeft="40dp"
         android:layout_marginTop="80dp"
         android:layout_below="@+id/line2"
-        android:textColor="@color/green"
-        android:textSize="38sp"
+        android:textColor="@color/green1"
+        android:textSize="50sp"
         android:textStyle="bold"
         android:id="@+id/pn"/>
 

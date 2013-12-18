@@ -89,95 +89,67 @@
 
         />
 
-
     <TextView
-        android:layout_width="240dp"
-        android:layout_height="35dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="30dp"
         android:layout_below="@+id/line2"
-        android:text="@string/swipe1"
+        android:text="@string/confirm"
         android:textColor="@color/black"
         android:textSize="28sp"
-        android:id="@+id/in"></TextView>
+        android:id="@+id/in"/>
+
+    <TextView
+        android:layout_below="@+id/in"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="5dp"
+        android:text="@string/phonenumber"
+        android:textColor="@color/red"
+        android:textSize="35sp"
+        android:id="@+id/phonenumber"/>
+
+    <TextView
+
+        android:layout_width="45dp"
+        android:layout_height="35dp"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/phonenumber"
+        android:text="@string/press1"
+        android:textColor="@color/black"
+        android:textSize="28sp"
+        android:id="@+id/pr"/>
 
     <Button
         android:id="@+id/enter"
-        android:layout_toRightOf="@+id/in"
-        android:layout_marginTop="20dp"
-
-        android:layout_below="@+id/line2"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/pr"
+        android:layout_below="@+id/phonenumber"
         android:layout_width="60dp"
         android:layout_height="35dp"
-        android:text="@string/swipe"
-        android:textColor="@color/green2"
+        android:text="@string/enter"
+        android:textColor="@color/green1"
         android:background="@color/white"
         android:textSize="28sp" />
 
     <TextView
-        android:layout_below="@+id/line2"
+        android:layout_below="@+id/phonenumber"
         android:layout_toRightOf="@+id/enter"
-        android:layout_width="70dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="20dp"
-        android:text="@string/swipe2"
-        android:textColor="@color/black"
-        android:textSize="28sp"
-        android:id="@+id/pre"></TextView>
-
-
-    <TextView
-        android:layout_below="@+id/in"
-
-        android:layout_marginLeft="50dp"
-        android:layout_width="135dp"
+        android:layout_width="500dp"
         android:layout_height="35dp"
         android:layout_marginTop="5dp"
-        android:text="@string/swipe3"
+        android:text="@string/open5"
         android:textColor="@color/black"
         android:textSize="28sp"
-        android:id="@+id/pree"></TextView>
-
-    <Button
-        android:id="@+id/cancel"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/pree"
-
-        android:layout_below="@+id/in"
-        android:layout_width="30dp"
-        android:layout_height="35dp"
-        android:text="@string/swipe5"
-        android:textColor="@color/green2"
-        android:background="@color/white"
-        android:textSize="28sp" />
-
-    <TextView
-        android:layout_toRightOf="@+id/cancel"
-        android:layout_below="@+id/in"
-        android:layout_width="200dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="5dp"
-        android:text="@string/swipe4"
-        android:textColor="@color/black"
-        android:textSize="28sp"
-        android:id="@+id/prees"></TextView>
-
-    <TextView
-
-        android:layout_below="@+id/prees"
-        android:layout_width="120dp"
-        android:layout_height="35dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginTop="5dp"
-        android:text="@string/swipe6"
-        android:textColor="@color/black"
-        android:textSize="28sp"
-        android:id="@+id/preess"></TextView>
+        android:id="@+id/pre"/>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="35dp"
         android:background="@drawable/bar3"
-        android:layout_alignParentBottom="true"></TextView>
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>
