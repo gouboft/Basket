@@ -21,7 +21,7 @@ public class BarcodeOpenActivity extends Activity {
 
         Intent intent = getIntent();
         boxNum = intent.getIntExtra("BoxNum", 0);
-        TextView tv = (TextView) findViewById(R.id.in1);
+        TextView tv = (TextView) findViewById(R.id.boxNumber);
         tv.setText(String.valueOf(boxNum));
     }
 

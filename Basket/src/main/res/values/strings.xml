@@ -18,21 +18,27 @@
     <string name="press4">”</string>
     <string name="press1">按“</string>
     <string name="cancel">取消</string>
+    <string name="delete">”删除。</string>
     <string name="press2">返回。</string>
-    <string name="press3">”键继续。</string>
+    <string name="press3">”继续，“</string>
     <string name="input">请输入11位手机号，并</string>
+    <string name="input1">请输入6位密码，并</string>
     <string name="xx">********</string>
 
-    <string name="open1">号抽屉已打开，请放入您的物品并关上柜门，并按“</string>
+    <string name="open1">号抽屉已打开，请放入</string>
     <string name="open2">密码开柜</string>
     <string name="open3">第</string>
     <string name="open4">确定</string>
-    <string name="open5">”键继续，按“取消”键重新输入。</string>
+    <string name="open5">”继续，“</string>
+    <string name="open9">”重新输入。</string>
+    <string name="open6">您的物品并关上柜门，并</string>
+    <string name="open7">号抽屉已打开，请</string>
+    <string name="open8">取出你的物品并关上柜门，谢谢！</string>
 
     <string name="fail">（失败原因）</string>
     <string name="fail1">按“</string>
-    <string name="press5">” 重新输入，</string>
-    <string name="fail2">” 返回</string>
+    <string name="press5">”重新输入，</string>
+    <string name="fail2">”返回</string>
 
     <string name="swipe1">请将会员卡放置于“</string>
     <string name="swipe2">” 位</string>
