@@ -42,8 +42,9 @@ public class PhoneNumConfirmActivity extends Activity {
         TextView tv = (TextView) findViewById(R.id.phonenumber);
         tv.setText(FormatPhoneNum(mPhoneNumber));
     }
+
     private String FormatPhoneNum(String phoneNumber) {
-        Pattern regex = Pattern.compile("^\\(?([0-9]{3})\\)?[-. ]?([0-9]{4})[-.?]?([0-9]{4}){1}quot;");
+        Pattern regex = Pattern.compile("([0-9]{3})([0-9]{4})([0-9]{4})");
         String formattedNumber = "";
         Matcher regexMatcher = regex.matcher(phoneNumber);
         if(regexMatcher.find()){
@@ -83,6 +84,4 @@ public class PhoneNumConfirmActivity extends Activity {
         }
         return super.dispatchKeyEvent(event);
     }
-
-
 }
