@@ -26,7 +26,7 @@ public class PhoneNumInputActivity extends Activity {
         setContentView(R.layout.phonenuminput);
 
         Intent intent = getIntent();
-        boxNum = intent.getIntExtra("BoxNum", 0);
+        boxNum = intent.getIntExtra("BoxNum", 1);
 
         editText = (EditText) findViewById(R.id.phonenumber);
         editText.requestFocus();
@@ -51,6 +51,7 @@ public class PhoneNumInputActivity extends Activity {
 
             if (phoneNumber.length() < 11) {
                 Intent intent = new Intent(PhoneNumInputActivity.this, PhoneNumFailActivity.class);
+                intent.putExtra("BoxNum", boxNum);
                 intent.putExtra("ErrorReason", "输入的手机号小于11位");
                 startActivity(intent);
             } else if (phoneNumber.length() == 11) {

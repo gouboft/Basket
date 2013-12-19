@@ -68,6 +68,8 @@
 
     <string name="confirm">你输入的手机号为：</string>
     <string name="phonenumber">13877778888</string>
+    <string name="thanks">谢谢使用!</string>
+    <string name="description">TitleOfTheUI</string>
 
 
 </resources>

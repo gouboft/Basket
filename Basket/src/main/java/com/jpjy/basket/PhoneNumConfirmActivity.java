@@ -59,6 +59,7 @@ public class PhoneNumConfirmActivity extends Activity {
                 isInput = true;
                 intent = new Intent(PhoneNumConfirmActivity.this,
                         PhoneNumInputActivity.class);
+                intent.putExtra("BoxNum", boxNum);
                 startActivity(intent);
                 PhoneNumConfirmActivity.this.finish();
                 break;
@@ -74,10 +75,6 @@ public class PhoneNumConfirmActivity extends Activity {
             Message msg = handler.obtainMessage(PHONENUM, boxNum, 0, mPhoneNumber);
             handler.sendMessage(msg);
 
-            intent = new Intent(PhoneNumConfirmActivity.this,
-                    SmsSendingActivity.class);
-            intent.putExtra("PhoneNumber", mPhoneNumber);
-            startActivity(intent);
             Log.d(TAG, "PhoneNumber is " + mPhoneNumber);
 
             return true;

@@ -2,7 +2,6 @@ package com.jpjy.basket;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import android.util.Base64;
 import android.util.Log;
 
 import org.w3c.dom.Document;

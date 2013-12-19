@@ -13,6 +13,7 @@ public class PhoneNumFailActivity extends Activity {
 
     private Intent intent;
     private boolean isInput = false;
+    private int boxNum;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,6 +24,7 @@ public class PhoneNumFailActivity extends Activity {
 
         Intent intent = getIntent();
         String er = intent.getStringExtra("ErrorReason");
+        boxNum = intent.getIntExtra("BoxNum", 1);
         TextView tv = (TextView) findViewById(R.id.ou);
         tv.setText(er);
 
@@ -60,6 +62,7 @@ public class PhoneNumFailActivity extends Activity {
 
             intent = new Intent(PhoneNumFailActivity.this,
                     PhoneNumInputActivity.class);
+            intent.putExtra("BoxNum", boxNum);
             startActivity(intent);
 
             return true;

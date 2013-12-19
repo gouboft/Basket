@@ -194,7 +194,12 @@ public class MainActivity extends Activity {
                         e.printStackTrace();
                     }
                     sendShortMessage(boxNumber, password, phoneNumber);
-                    Log.d(TAG, "SendMessage ...........................");
+                    Log.d(TAG, "SendMessage to " + phoneNumber);
+
+                    Intent intent = new Intent(MainActivity.this, SmsSendingActivity.class);
+                    intent.putExtra("Prompt", "已发送到:");
+                    intent.putExtra("PhoneNumber", phoneNumber);
+                    startActivity(intent);
                 }
             }
         }
@@ -204,18 +209,18 @@ public class MainActivity extends Activity {
         int[] flag = new int[Config.BOXNUMBER];
         for (Data data : mData) {
             int boxNumber = data.getBoxNumber();
-            flag[boxNumber] = 1;
+            flag[boxNumber-1] = 1;
         }
 
-        for (int i = 1; i < Config.BOXNUMBER; i++) {
-            if (flag[i] != 1)
+        for (int i = 1; i <= Config.BOXNUMBER; i++) {
+            if (flag[i-1] != 1)
                 return i;
         }
         return 0;
     }
 
     private int generatePassword() {
-        int[] array = {0,1,2,3,4,5,6,7,8,9};
+        int[] array = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         Random rand = new Random();
         for (int i = 10; i > 1; i--) {
             int index = rand.nextInt(i);
@@ -224,66 +229,20 @@ public class MainActivity extends Activity {
             array[i - 1] = tmp;
         }
         int result = 0;
-        for(int i = 0; i < 6; i++)
+        for (int i = 0; i < 6; i++) {
+            if (array[0] == 0)
+                array[0] = 1;
             result = result * 10 + array[i];
+        }
         return result;
     }
 
     private void sendShortMessage(int boxNumber, int password, String phoneNumber) {
-        PendingIntent pi = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+/*        PendingIntent pi = PendingIntent.getActivity(this, 0,
+                new Intent(this, MainActivity.class), 0);*/
         SmsManager sms = SmsManager.getDefault();
         String message = generateSmsContent(boxNumber, password);
-/*        sms.sendTextMessage(phoneNumber, null, message, pi, null);*/
-        sendMsg(phoneNumber, message);
-    }
-
-    private void sendMsg(String number, String message) {
-        String SENT = "sms_sent";
-        String DELIVERED = "sms_delivered";
-
-        PendingIntent sentPI = PendingIntent.getActivity(this, 0, new Intent(SENT), 0);
-        PendingIntent deliveredPI = PendingIntent.getActivity(this, 0, new Intent(DELIVERED), 0);
-
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                switch (getResultCode()) {
-                    case Activity.RESULT_OK:
-                        Log.i("====>", "Activity.RESULT_OK");
-                        break;
-                    case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-                        Log.i("====>", "RESULT_ERROR_GENERIC_FAILURE");
-                        break;
-                    case SmsManager.RESULT_ERROR_NO_SERVICE:
-                        Log.i("====>", "RESULT_ERROR_NO_SERVICE");
-                        break;
-                    case SmsManager.RESULT_ERROR_NULL_PDU:
-                        Log.i("====>", "RESULT_ERROR_NULL_PDU");
-                        break;
-                    case SmsManager.RESULT_ERROR_RADIO_OFF:
-                        Log.i("====>", "RESULT_ERROR_RADIO_OFF");
-                        break;
-                }
-            }
-        }, new IntentFilter(SENT));
-
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                switch (getResultCode()) {
-                    case Activity.RESULT_OK:
-                        Log.i("====>", "RESULT_OK");
-                        break;
-                    case Activity.RESULT_CANCELED:
-                        Log.i("=====>", "RESULT_CANCELED");
-                        break;
-                }
-            }
-        }, new IntentFilter(DELIVERED));
-
-        SmsManager smsm = SmsManager.getDefault();
-        smsm.sendTextMessage(number, null, message, sentPI, deliveredPI);
+        sms.sendTextMessage(phoneNumber, null, message, null, null);
     }
 
     private String generateSmsContent(int boxNumber, int password) {

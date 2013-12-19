@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:orientation="horizontal"
-                android:background="@color/white">
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:background="@color/white">
 
     <ImageView
-            android:id="@+id/iv_avatar"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/welcome3"/>
+        android:id="@+id/iv_avatar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/welcome3" />
 
     <ImageView
-            android:id="@+id/ivr"
-            android:layout_below="@+id/iv_avatar"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginLeft="40dp"
-            android:background="@drawable/welcome2"/>
+        android:id="@+id/ivr"
+        android:layout_below="@+id/iv_avatar"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="40dp"
+        android:background="@drawable/welcome2" />
 
     <TextView
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/iv_avatar"
-            android:layout_toRightOf="@+id/ivr"
-            android:layout_marginTop="28dp"
-            android:layout_marginLeft="60dp"
-            android:textColor="@color/black"
-            android:textSize="55sp"
-            android:text="@string/zhineng"
-            android:id="@+id/zhi"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/iv_avatar"
+        android:layout_toRightOf="@+id/ivr"
+        android:layout_marginTop="28dp"
+        android:layout_marginLeft="60dp"
+        android:textColor="@color/black"
+        android:textSize="55sp"
+        android:text="@string/zhineng"
+        android:id="@+id/zhi"
 
-            />
+        />
 
     <TextView
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/zhi"
-            android:layout_toRightOf="@+id/ivr"
-            android:layout_marginTop="15dp"
-            android:layout_marginLeft="60dp"
-            android:textColor="@color/black"
-            android:textSize="55sp"
-            android:text="@string/huogui"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/zhi"
+        android:layout_toRightOf="@+id/ivr"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="60dp"
+        android:textColor="@color/black"
+        android:textSize="55sp"
+        android:text="@string/huogui"
 
-            />
+        />
 
 
 </RelativeLayout>
