@@ -11,8 +11,9 @@
     <string name="barcardkai">2 条码开柜请按2</string>
     <string name="telnum">电话4008301230</string>
 
-    <string name="lo1">智能柜族</string>
-    <string name="lo2">领鲜生活</string>
+    <string name="lo1">广州市泰极信息科技有限公司</string>
+    <string name="lo2">1</string>
+
 
     <string name="enter">确认</string>
     <string name="press4">”</string>
@@ -70,6 +71,7 @@
     <string name="phonenumber">13877778888</string>
     <string name="thanks">谢谢使用!</string>
     <string name="description">TitleOfTheUI</string>
+    <string name="taiji">TaiJi</string>
 
 
 </resources>

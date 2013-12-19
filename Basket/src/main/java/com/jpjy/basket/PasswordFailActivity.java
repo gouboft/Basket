@@ -35,22 +35,22 @@ public class PasswordFailActivity extends Activity {
                     PasswordFailActivity.this.finish();
                 }
             }
-        }, 2000);
+        }, 5000);
 
     }
 
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-
         switch (keyCode) {
             case KeyEvent.KEYCODE_DEL:
                 isInput = true;
                 intent = new Intent(PasswordFailActivity.this,
-                        PasswordActivity.class);
+                        ChoiceActivity.class);
                 startActivity(intent);
                 PasswordFailActivity.this.finish();
                 break;
         }
-        return true;
+        return super.onKeyDown(keyCode, event);
     }
 
     public boolean dispatchKeyEvent(KeyEvent event) {

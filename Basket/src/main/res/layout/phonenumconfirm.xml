@@ -6,70 +6,47 @@
     android:background="@color/white">
 
     <RelativeLayout
-        android:id="@+id/horzi"
-        android:layout_width="fill_parent"
-        android:layout_height="60dip">
+            android:id="@+id/horzi"
+            android:layout_width="fill_parent"
+            android:layout_height="60dip">
 
         <ImageView
-            android:id="@+id/iv_avatar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/logo"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="20dp" />
+                android:id="@+id/iv_avatar"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/logo"
+                android:layout_marginLeft="7dp"
+                android:layout_marginTop="10dp"
+                android:contentDescription="@string/taiji"/>
 
         <View
-            android:layout_height="fill_parent"
-            android:background="@color/brown4"
-            android:layout_toRightOf="@+id/iv_avatar"
-            android:layout_width="1dp"
-            android:id="@+id/line3"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:layout_marginLeft="5dp" />
+                android:layout_height="fill_parent"
+                android:background="@color/brown4"
+                android:layout_toRightOf="@+id/iv_avatar"
+                android:layout_width="1dp"
+                android:id="@+id/line3"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="5dp" />
 
         <View
-            android:layout_height="fill_parent"
-            android:background="@color/brown3"
-            android:layout_width="1dp"
-            android:layout_marginTop="20dp"
-            android:layout_toRightOf="@+id/line3"
-            android:id="@+id/line4"
-            android:layout_gravity="center_horizontal" />
+                android:layout_height="fill_parent"
+                android:background="@color/brown3"
+                android:layout_width="1dp"
+                android:layout_marginTop="20dp"
+                android:layout_toRightOf="@+id/line3"
+                android:id="@+id/line4"
+                android:layout_gravity="center_horizontal" />
 
-        <LinearLayout
-            android:layout_toRightOf="@+id/line4"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginLeft="5dp"
-            android:id="@+id/ly5">
-
-            <TextView
+        <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/green"
-                android:textSize="14sp"
+                android:layout_toRightOf="@+id/line4"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="10dp"
+                android:textColor="@color/black"
+                android:textSize="25sp"
                 android:text="@string/lo1" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_toRightOf="@+id/line4"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/ly5"
-            android:layout_marginLeft="5dp"
-            android:id="@+id/ly8">
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/green"
-                android:textSize="14sp"
-                android:text="@string/lo2" />
-        </LinearLayout>
-
-
     </RelativeLayout>
 
     <View
@@ -94,7 +71,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="40dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:layout_below="@+id/line2"
         android:text="@string/confirm"
         android:textColor="@color/black"
@@ -109,7 +86,7 @@
         android:layout_marginTop="5dp"
         android:text="@string/phonenumber"
         android:textColor="@color/red"
-        android:textSize="35sp" />
+        android:textSize="39sp" />
 
     <TextView
         android:id="@+id/text2"
@@ -120,7 +97,7 @@
         android:layout_below="@+id/phonenumber"
         android:text="@string/press1"
         android:textColor="@color/black"
-        android:textSize="20sp" />
+        android:textSize="25sp" />
 
     <TextView
         android:id="@+id/enter"
@@ -131,7 +108,7 @@
         android:layout_below="@+id/phonenumber"
         android:text="@string/enter"
         android:textColor="@color/green1"
-        android:textSize="20sp" />
+        android:textSize="25sp" />
 
 
     <TextView
@@ -143,7 +120,7 @@
         android:layout_marginTop="5dp"
         android:text="@string/open5"
         android:textColor="@color/black"
-        android:textSize="20sp" />
+        android:textSize="25sp" />
 
     <TextView
         android:id="@+id/cancel"
@@ -154,7 +131,7 @@
         android:layout_marginTop="5dp"
         android:text="@string/cancel"
         android:textColor="@color/red"
-        android:textSize="20sp" />
+        android:textSize="25sp" />
 
 
     <TextView
@@ -165,7 +142,7 @@
         android:layout_marginTop="5dp"
         android:text="@string/open9"
         android:textColor="@color/black"
-        android:textSize="20sp"
+        android:textSize="25sp"
         android:id="@+id/text" />
 
     <TextView

@@ -56,15 +56,8 @@ public class PasswordActivity extends Activity {
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         isInput = true;
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DEL:
-                intent = new Intent(PasswordActivity.this,
-                        ChoiceActivity.class);
-                startActivity(intent);
-                PasswordActivity.this.finish();
-                break;
-        }
-        return true;
+        Log.d(TAG,"keycode = " +  keyCode);
+        return super.onKeyDown(keyCode, event);
     }
 
 

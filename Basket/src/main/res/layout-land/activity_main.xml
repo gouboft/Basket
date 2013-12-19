@@ -11,11 +11,12 @@
 
         <ImageView
             android:id="@+id/iv_avatar"
-            android:layout_width="wrap_content"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:src="@drawable/logo"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="20dp" />
+            android:layout_marginLeft="7dp"
+            android:layout_marginTop="10dp"
+            android:contentDescription="@string/taiji"/>
 
         <View
             android:layout_height="fill_parent"
@@ -36,39 +37,15 @@
             android:id="@+id/line4"
             android:layout_gravity="center_horizontal" />
 
-        <LinearLayout
-            android:layout_toRightOf="@+id/line4"
+        <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/line4"
             android:layout_marginTop="20dp"
-            android:layout_marginLeft="5dp"
-            android:id="@+id/ly5">
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/green"
-                android:textSize="14sp"
-                android:text="@string/lo1" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_toRightOf="@+id/line4"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/ly5"
-            android:layout_marginLeft="5dp"
-            android:id="@+id/ly8">
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/green"
-                android:textSize="14sp"
-                android:text="@string/lo2" />
-        </LinearLayout>
-
-
+            android:layout_marginLeft="10dp"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            android:text="@string/lo1" />
     </RelativeLayout>
 
     <View
@@ -133,24 +110,6 @@
         android:textColor="@color/black"
         android:background="@color/white"
         android:textSize="24sp" />
-
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:layout_marginLeft="250dp"
-        android:layout_below="@+id/barcardkai"
-        android:id="@+id/post">
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/telnum"
-            android:textColor="@color/blue1"
-            android:paddingLeft="30dp"
-            android:textSize="17sp" />
-    </RelativeLayout>
-
 
     <TextView
         android:layout_width="fill_parent"

@@ -9,6 +9,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class SmsSendingActivity extends Activity {
     private static final String TAG = "SmsSendingActivity";
 
@@ -26,7 +29,7 @@ public class SmsSendingActivity extends Activity {
         String prompt = intent.getStringExtra("Prompt");
 
         TextView tv = (TextView) findViewById(R.id.pn);
-        tv.setText(phoneNumber);
+        tv.setText(FormatPhoneNum(phoneNumber));
         if (prompt != null && prompt.equals("已发送到:")) {
             TextView tv1 = (TextView) findViewById(R.id.prompt);
             tv1.setText(prompt);
@@ -38,5 +41,16 @@ public class SmsSendingActivity extends Activity {
                 SmsSendingActivity.this.startActivity(intent);
             }
         }, 5000);
+    }
+
+
+    private String FormatPhoneNum(String phoneNumber) {
+        Pattern regex = Pattern.compile("([0-9]{3})([0-9]{4})([0-9]{4})");
+        String formattedNumber = "";
+        Matcher regexMatcher = regex.matcher(phoneNumber);
+        if(regexMatcher.find()){
+            formattedNumber = regexMatcher.replaceAll("$1-$2-$3");
+        }
+        return formattedNumber;
     }
 }
