@@ -238,8 +238,6 @@ public class MainActivity extends Activity {
     }
 
     private void sendShortMessage(int boxNumber, int password, String phoneNumber) {
-/*        PendingIntent pi = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);*/
         SmsManager sms = SmsManager.getDefault();
         String message = generateSmsContent(boxNumber, password);
         sms.sendTextMessage(phoneNumber, null, message, null, null);
@@ -273,7 +271,7 @@ public class MainActivity extends Activity {
     }
 
     private void openDoor(int doorNo) {
-/*        int fd;
+        int fd;
 
         fd = Linuxc.openUart(Config.electronicLockDevice);
         if (fd < 0) {
@@ -285,7 +283,7 @@ public class MainActivity extends Activity {
         Linuxc.sendHexUart(keyOfLock(doorNo));
         Linuxc.closeUart();
 
-        if (Debug) Log.d(TAG, "The number of the door  " + doorNo + " is open!");*/
+        if (Debug) Log.d(TAG, "The number of the door  " + doorNo + " is open!");
     }
 
     private int[] keyOfLock(int doorNo) {

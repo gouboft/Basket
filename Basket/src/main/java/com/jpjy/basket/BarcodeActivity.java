@@ -38,7 +38,6 @@ public class BarcodeActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.barcode);
-/*
 
         int fd = Linuxc.openUart(Config.barcodeDevice);
         if (fd > 0) {
@@ -48,7 +47,6 @@ public class BarcodeActivity extends Activity {
 
         if (!initSetting() || !SettingValue(CommandStart))
             Log.d(TAG, "Hardware Error");
-*/
 
         MyApplication myApplication = (MyApplication) getApplication();
         mEventHandler = myApplication.getHandler();
@@ -84,8 +82,8 @@ public class BarcodeActivity extends Activity {
             mBarcodeThread = null;
         }
         GotoSleep(100);
-/*        SettingValue(CommandStop);*/
-/*        Linuxc.closeUart();*/
+        SettingValue(CommandStop);
+        Linuxc.closeUart();
         finish();
     }
 
@@ -107,8 +105,8 @@ public class BarcodeActivity extends Activity {
         public void run() {
             super.run();
             while (!isInterrupted()) {
-/*                mBarcode = Linuxc.receiveMsgUart();*/
-                mBarcode = "1234567890";
+                mBarcode = Linuxc.receiveMsgUart();
+/*                mBarcode = "1234567890";*/
                 if (mBarcode != null) {
                     isInput = true;
 
