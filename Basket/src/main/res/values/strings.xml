@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">container</string>
+    <string name="app_name">泰极</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
 
     <string name="welcomeword">欢迎使用智能货柜</string>
     <string name="passwordkai">1 密码开柜请按1</string>
     <string name="postcardkai">2 刷卡开柜请按2</string>
     <string name="barcardkai">2 条码开柜请按2</string>
-    <string name="telnum">电话4008301230</string>
+    <string name="telnum">联系电话: 020–85673105</string>
 
     <string name="lo1">广州市泰极信息科技有限公司</string>
-    <string name="lo2">1</string>
-
 
     <string name="enter">确认</string>
     <string name="press4">”</string>
