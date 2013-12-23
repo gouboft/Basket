@@ -6,56 +6,56 @@
     android:background="@color/white">
 
     <RelativeLayout
-            android:id="@+id/horzi"
-            android:layout_width="fill_parent"
-            android:layout_height="60dip">
+        android:id="@+id/horzi"
+        android:layout_width="fill_parent"
+        android:layout_height="60dip">
 
         <ImageView
-                android:id="@+id/iv_avatar"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:src="@drawable/logo"
-                android:layout_marginLeft="7dp"
-                android:layout_marginTop="10dp"
-                android:contentDescription="@string/taiji"/>
+            android:id="@+id/iv_avatar"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/logo"
+            android:layout_marginLeft="7dp"
+            android:layout_marginTop="10dp"
+            android:contentDescription="@string/taiji" />
 
         <View
-                android:layout_height="fill_parent"
-                android:background="@color/brown4"
-                android:layout_toRightOf="@+id/iv_avatar"
-                android:layout_width="1dp"
-                android:id="@+id/line3"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:layout_marginLeft="5dp" />
+            android:layout_height="fill_parent"
+            android:background="@color/brown4"
+            android:layout_toRightOf="@+id/iv_avatar"
+            android:layout_width="1dp"
+            android:id="@+id/line3"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="5dp" />
 
         <View
-                android:layout_height="fill_parent"
-                android:background="@color/brown3"
-                android:layout_width="1dp"
-                android:layout_marginTop="20dp"
-                android:layout_toRightOf="@+id/line3"
-                android:id="@+id/line4"
-                android:layout_gravity="center_horizontal" />
+            android:layout_height="fill_parent"
+            android:background="@color/brown3"
+            android:layout_width="1dp"
+            android:layout_marginTop="20dp"
+            android:layout_toRightOf="@+id/line3"
+            android:id="@+id/line4"
+            android:layout_gravity="center_horizontal" />
 
         <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/line4"
-                android:layout_marginTop="20dp"
-                android:layout_marginLeft="10dp"
-                android:textColor="@color/black"
-                android:textSize="25sp"
-                android:text="@string/lo1" />
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/line4"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="10dp"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            android:text="@string/lo1" />
     </RelativeLayout>
 
     <View
-            android:layout_height="1dp"
-            android:background="@color/brown2"
-            android:layout_width="fill_parent"
-            android:id="@+id/line1"
-            android:layout_below="@+id/horzi"
-            android:layout_marginTop="17dp" />
+        android:layout_height="1dp"
+        android:background="@color/brown2"
+        android:layout_width="fill_parent"
+        android:id="@+id/line1"
+        android:layout_below="@+id/horzi"
+        android:layout_marginTop="17dp" />
 
     <ImageView
         android:id="@+id/ivr"
